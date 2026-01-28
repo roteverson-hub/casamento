@@ -15,17 +15,17 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        .font-dancing { font-family: 'Dancing_Script', cursive; }
+        .font-dancing { font-family: 'Dancing Script', cursive; }
         .font-playfair { font-family: 'Playfair Display', serif; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .animate-fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
     </style>
 </head>
 <body class="bg-white text-slate-800 antialiased selection:bg-rose-100">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useCallback } = React;
 
         const WEDDING_DATE = new Date('2026-05-02T16:00:00');
         const COUPLE_NAMES = "Júlia & Vitor";
@@ -35,9 +35,10 @@
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
             const [searchName, setSearchName] = useState('');
             const [loading, setLoading] = useState(false);
-            const [foundGuests, setFoundGuests] = useState([]);
+            const [groupedResults, setGroupedResults] = useState(null); 
+            const [selectedInvite, setSelectedInvite] = useState(null); 
             const [error, setError] = useState('');
-            const [attendance, setAttendance] = useState({});
+            const [attendance, setAttendance] = useState({}); 
             const [isSubmitting, setIsSubmitting] = useState(false);
             const [finished, setFinished] = useState(false);
 
@@ -46,10 +47,10 @@
                     const now = new Date();
                     const difference = WEDDING_DATE.getTime() - now.getTime();
                     setTimeLeft({
-                        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-                        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-                        minutes: Math.floor((difference / 1000 / 60) % 60),
-                        seconds: Math.floor((difference / 1000) % 60)
+                        days: Math.max(0, Math.floor(difference / (1000 * 60 * 60 * 24))),
+                        hours: Math.max(0, Math.floor((difference / (1000 * 60 * 60)) % 24)),
+                        minutes: Math.max(0, Math.floor((difference / 1000 / 60) % 60)),
+                        seconds: Math.max(0, Math.floor((difference / 1000) % 60))
                     });
                 }, 1000);
                 return () => clearInterval(timer);
@@ -62,16 +63,28 @@
                 }
                 setError('');
                 setLoading(true);
+                setGroupedResults(null);
+                setSelectedInvite(null);
+
                 try {
                     const response = await fetch(`${SCRIPT_URL}?nome=${encodeURIComponent(searchName.trim())}`);
                     const data = await response.json();
+                    
                     if (data && data.length > 0) {
-                        setFoundGuests(data);
-                        const initialAttendance = {};
-                        data.forEach(g => {
-                            initialAttendance[g.nomeIndividual] = g.situacao === "Confirmado";
-                        });
-                        setAttendance(initialAttendance);
+                        const groups = data.reduce((acc, curr) => {
+                            const key = curr.nomeConvite;
+                            if (!acc[key]) acc[key] = [];
+                            acc[key].push(curr);
+                            return acc;
+                        }, {});
+                        
+                        setGroupedResults(groups);
+                        
+                        const inviteNames = Object.keys(groups);
+                        if (inviteNames.length === 1) {
+                            const name = inviteNames[0];
+                            selectInvite(name, groups[name]);
+                        }
                     } else {
                         setError('Convite não encontrado.');
                     }
@@ -82,16 +95,34 @@
                 }
             };
 
-            const toggleAttendance = (nome) => {
-                setAttendance(prev => ({ ...prev, [nome]: !prev[nome] }));
+            const selectInvite = (name, guests) => {
+                const initialAttendance = {};
+                guests.forEach(g => {
+                    // Garantimos que a chave seja uma string única (rowId)
+                    initialAttendance[String(g.rowId)] = g.situacao === "Confirmado";
+                });
+                setAttendance(initialAttendance);
+                setSelectedInvite({ name, guests });
+            };
+
+            const toggleAttendance = (e, rowId) => {
+                // Evita propagação caso haja elementos aninhados
+                e.preventDefault();
+                const key = String(rowId);
+                setAttendance(prev => ({
+                    ...prev,
+                    [key]: !prev[key]
+                }));
             };
 
             const submitRSVP = async () => {
                 setIsSubmitting(true);
-                const payload = foundGuests.map(g => ({
+                const payload = selectedInvite.guests.map(g => ({
+                    rowId: g.rowId,
                     nomeIndividual: g.nomeIndividual,
-                    presente: attendance[g.nomeIndividual]
+                    presente: !!attendance[String(g.rowId)]
                 }));
+                
                 try {
                     await fetch(SCRIPT_URL, {
                         method: 'POST',
@@ -125,14 +156,14 @@
                         </nav>
                     </header>
 
-                    <section id="home" className="flex flex-col items-center pt-12 pb-20 px-6">
+                    <section id="home" className="flex flex-col items-center pt-12 pb-20 px-6 text-center">
                         <div className="relative w-full max-w-4xl overflow-hidden rounded-b-[200px] mb-12 shadow-sm border border-slate-50">
                             <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1200" className="w-full h-[400px] md:h-[600px] object-cover" />
                         </div>
-                        <h1 className="text-6xl md:text-8xl font-dancing mb-6 text-slate-900 text-center">{COUPLE_NAMES}</h1>
+                        <h1 className="text-6xl md:text-8xl font-dancing mb-6 text-slate-900">{COUPLE_NAMES}</h1>
                         <div className="flex flex-col items-center space-y-4">
                             <span className="text-2xl md:text-3xl font-playfair tracking-[0.15em] text-slate-700">02.05.2026</span>
-                            <div className="flex gap-4 md:gap-8 text-center uppercase tracking-widest text-[10px] md:text-xs text-slate-400">
+                            <div className="flex gap-4 md:gap-8 uppercase tracking-widest text-[10px] md:text-xs text-slate-400">
                                 <div><span className="block text-xl md:text-2xl text-slate-700 font-bold">{timeLeft.days}</span> Dias</div>
                                 <div><span className="block text-xl md:text-2xl text-slate-700 font-bold">{timeLeft.hours}</span> Hrs</div>
                                 <div><span className="block text-xl md:text-2xl text-slate-700 font-bold">{timeLeft.minutes}</span> Min</div>
@@ -166,7 +197,7 @@
                     </section>
 
                     <section id="rsvp" className="bg-slate-50 py-24 px-6">
-                        <div className="max-w-xl mx-auto bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden">
+                        <div className="max-w-xl mx-auto bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden min-h-[400px] flex flex-col">
                             <div className="absolute top-0 left-0 w-2 h-full bg-rose-200" />
                             <div className="text-center mb-10">
                                 <h2 className="text-3xl font-playfair mb-2">Confirmar Presença</h2>
@@ -174,42 +205,75 @@
                             </div>
 
                             {finished ? (
-                                <div className="text-center py-10 animate-fade-in">
+                                <div className="text-center py-10 animate-fade-in flex-grow flex flex-col justify-center">
+                                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                        <span className="text-green-500 text-2xl">✓</span>
+                                    </div>
                                     <h3 className="text-2xl font-playfair text-slate-800 mb-2">Obrigado!</h3>
-                                    <p className="text-slate-500">Confirmação enviada.</p>
+                                    <p className="text-slate-500">Sua resposta foi enviada.</p>
+                                    <button onClick={() => { setFinished(false); setGroupedResults(null); setSelectedInvite(null); setSearchName(''); }} className="mt-8 text-rose-300 font-bold uppercase text-[10px] tracking-widest border-b border-rose-100 inline-block mx-auto">Confirmar outro convite</button>
                                 </div>
-                            ) : foundGuests.length === 0 ? (
-                                <div className="space-y-4">
+                            ) : !groupedResults ? (
+                                <div className="space-y-4 animate-fade-in">
                                     <input 
                                         type="text" 
                                         value={searchName}
                                         onChange={(e) => setSearchName(e.target.value)}
+                                        onKeyPress={(e) => e.key === 'Enter' && handleRSVPSearch()}
                                         placeholder="Nome do Convite" 
-                                        className="w-full p-4 bg-slate-50 rounded-2xl outline-none"
+                                        className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-rose-100 transition-all border border-transparent focus:border-rose-200"
                                     />
                                     {error && <p className="text-rose-500 text-[10px] text-center uppercase tracking-wider">{error}</p>}
-                                    <button onClick={handleRSVPSearch} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs">
+                                    <button onClick={handleRSVPSearch} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-black transition-all disabled:opacity-50" disabled={loading}>
                                         {loading ? "Buscando..." : "Verificar Convite"}
                                     </button>
                                 </div>
+                            ) : !selectedInvite ? (
+                                <div className="animate-fade-in space-y-4">
+                                    <p className="text-center text-slate-500 text-sm mb-6">Encontramos mais de um convite. Qual é o seu?</p>
+                                    {Object.keys(groupedResults).map((name) => (
+                                        <button 
+                                            key={name}
+                                            onClick={() => selectInvite(name, groupedResults[name])}
+                                            className="w-full p-5 bg-white border border-slate-100 rounded-2xl text-left hover:border-rose-200 hover:shadow-md transition-all flex justify-between items-center group"
+                                        >
+                                            <span className="font-playfair text-lg text-slate-800 group-hover:text-rose-400">{name}</span>
+                                            <span className="text-slate-300 group-hover:translate-x-1 transition-transform">→</span>
+                                        </button>
+                                    ))}
+                                    <button onClick={() => setGroupedResults(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Voltar para busca</button>
+                                </div>
                             ) : (
                                 <div className="animate-fade-in">
-                                    <div className="mb-8 p-4 bg-rose-50 rounded-2xl border border-rose-100 text-center">
-                                        <h4 className="text-xl font-playfair text-slate-800">{foundGuests[0].nomeConvite}</h4>
+                                    <div className="mb-8 p-6 bg-rose-50/50 rounded-3xl border border-rose-100 text-center">
+                                        <span className="text-[10px] text-rose-300 uppercase tracking-[0.2em] font-bold">Convite selecionado</span>
+                                        <h4 className="text-2xl font-playfair text-slate-800 mt-2">{selectedInvite.name}</h4>
                                     </div>
                                     <div className="space-y-3 mb-8">
-                                        {foundGuests.map((g, idx) => (
-                                            <div key={idx} onClick={() => toggleAttendance(g.nomeIndividual)} className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all ${attendance[g.nomeIndividual] ? 'bg-white border-rose-200' : 'bg-slate-50 border-transparent opacity-60'}`}>
-                                                <span className="font-medium">{g.nomeIndividual}</span>
-                                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${attendance[g.nomeIndividual] ? 'bg-rose-400 border-rose-400' : 'border-slate-300'}`}>
-                                                    {attendance[g.nomeIndividual] && <span className="text-white text-xs">✓</span>}
+                                        {selectedInvite.guests.map((g) => {
+                                            const isSelected = !!attendance[String(g.rowId)];
+                                            return (
+                                                <div 
+                                                    key={String(g.rowId)} 
+                                                    onClick={(e) => toggleAttendance(e, g.rowId)} 
+                                                    className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${isSelected ? 'bg-white border-rose-300 shadow-md transform scale-[1.02]' : 'bg-slate-50 border-transparent opacity-70 hover:opacity-100'}`}
+                                                >
+                                                    <span className={`font-medium transition-colors ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>{g.nomeIndividual}</span>
+                                                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-rose-400 border-rose-400 rotate-[360deg]' : 'border-slate-300 bg-transparent'}`}>
+                                                        {isSelected && <span className="text-white text-sm font-bold">✓</span>}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
-                                    <button onClick={submitRSVP} className="w-full bg-rose-400 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs">
+                                    <button 
+                                        onClick={submitRSVP} 
+                                        disabled={isSubmitting}
+                                        className="w-full bg-rose-400 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-rose-500 shadow-lg shadow-rose-100 disabled:opacity-50 transform active:scale-95 transition-all"
+                                    >
                                         {isSubmitting ? "Enviando..." : "Confirmar Presença"}
                                     </button>
+                                    <button onClick={() => setSelectedInvite(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Trocar convite</button>
                                 </div>
                             )}
                         </div>
