@@ -8,8 +8,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
     <!-- React & Babel for standalone usage -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -19,18 +17,21 @@
         .font-playfair { font-family: 'Playfair Display', serif; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        .scroll-smooth { scroll-behavior: smooth; }
     </style>
 </head>
-<body class="bg-white text-slate-800 antialiased selection:bg-rose-100">
+<body class="bg-white text-slate-800 antialiased selection:bg-rose-100 scroll-smooth">
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useCallback } = React;
+        const { useState, useEffect } = React;
 
         const WEDDING_DATE = new Date('2026-05-02T16:00:00');
         const COUPLE_NAMES = "Júlia & Vitor";
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw766Z70PB6ORpMJxKLOSrSHeHtB0VdvwVe9uQry0n2cwdA10mDfZ0DRh4god516iIg/exec";
-
+        
+        // URL ATUALIZADA FORNECIDA PELO USUÁRIO
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB7o5ix3C9yKnmVepXES_v2C7WzzxQIKOHNL4bGTiEz1kh0l7v1pBhnfkQeX45cRzz/exec";
+        
         const App = () => {
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
             const [searchName, setSearchName] = useState('');
@@ -56,23 +57,19 @@
                 return () => clearInterval(timer);
             }, []);
 
-            // Função para gerar uma chave única mesmo se o backend falhar nos IDs
-            const getUniqueKey = (guest) => {
-                return `${guest.rowId}-${guest.nomeIndividual}`.replace(/\s+/g, '');
-            };
+            const getUniqueKey = (guest) => `${guest.rowId}-${guest.nomeIndividual}`.replace(/\s+/g, '');
 
             const handleRSVPSearch = async () => {
-                if (searchName.trim().length < 3) {
+                const query = searchName.trim();
+                
+                if (query.length < 3) {
                     setError('Por favor, digite pelo menos 3 letras.');
                     return;
                 }
                 setError('');
                 setLoading(true);
-                setGroupedResults(null);
-                setSelectedInvite(null);
-
                 try {
-                    const response = await fetch(`${SCRIPT_URL}?nome=${encodeURIComponent(searchName.trim())}`);
+                    const response = await fetch(`${SCRIPT_URL}?nome=${encodeURIComponent(query)}`);
                     const data = await response.json();
                     
                     if (data && data.length > 0) {
@@ -85,16 +82,14 @@
                         
                         setGroupedResults(groups);
                         
-                        const inviteNames = Object.keys(groups);
-                        if (inviteNames.length === 1) {
-                            const name = inviteNames[0];
-                            selectInvite(name, groups[name]);
+                        if (Object.keys(groups).length === 1) {
+                            selectInvite(Object.keys(groups)[0], groups[Object.keys(groups)[0]]);
                         }
                     } else {
-                        setError('Convite não encontrado.');
+                        setError('Nenhum convite encontrado. Tente apenas o primeiro nome ou verifique a grafia.');
                     }
                 } catch (err) {
-                    setError('Erro ao conectar com a lista.');
+                    setError('Ocorreu um erro na busca. Tente novamente.');
                 } finally {
                     setLoading(false);
                 }
@@ -102,21 +97,14 @@
 
             const selectInvite = (name, guests) => {
                 const initialAttendance = {};
-                guests.forEach(g => {
-                    const key = getUniqueKey(g);
-                    initialAttendance[key] = g.situacao === "Confirmado";
-                });
+                guests.forEach(g => initialAttendance[getUniqueKey(g)] = g.situacao === "Confirmado");
                 setAttendance(initialAttendance);
                 setSelectedInvite({ name, guests });
             };
 
             const toggleAttendance = (guest) => {
                 const key = getUniqueKey(guest);
-                setAttendance(prev => {
-                    const newState = { ...prev };
-                    newState[key] = !prev[key];
-                    return newState;
-                });
+                setAttendance(prev => ({ ...prev, [key]: !prev[key] }));
             };
 
             const submitRSVP = async () => {
@@ -126,14 +114,8 @@
                     nomeIndividual: g.nomeIndividual,
                     presente: !!attendance[getUniqueKey(g)]
                 }));
-                
                 try {
-                    await fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        body: JSON.stringify(payload),
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    });
+                    await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                     setFinished(true);
                 } catch (err) {
                     setError('Erro ao salvar sua confirmação.');
@@ -143,10 +125,16 @@
             };
 
             const gifts = [
-                { id: 1, title: 'Brinde da noite de núpcias', price: 491.71, image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=500' },
-                { id: 2, title: 'Brunch honeymoon no quarto', price: 268.49, image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=500' },
-                { id: 3, title: 'Café da manhã romântico', price: 361.65, image: 'https://images.unsplash.com/photo-1495214781650-648ac8046fe1?q=80&w=500' },
-                { id: 4, title: 'Churrasqueira Elétrica', price: 250.00, image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=500' },
+                { id: 1, title: 'Brinde da noite de núpcias', price: 491.71, desc: 'Champagne e frutas para nossa primeira noite.', image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=500', link: 'https://mpago.la/exemplo1' },
+                { id: 2, title: 'Brunch honeymoon no quarto', price: 268.49, desc: 'Café da manhã completo servido no quarto.', image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=500', link: 'https://mpago.la/exemplo2' },
+                { id: 3, title: 'Café da manhã romântico', price: 361.65, desc: 'Um despertar especial em um café charmoso.', image: 'https://images.unsplash.com/photo-1495214781650-648ac8046fe1?q=80&w=500', link: 'https://mpago.la/exemplo3' },
+                { id: 4, title: 'Churrasqueira Elétrica', price: 250.00, desc: 'Para nossos almoços de domingo com a família.', image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=500', link: 'https://mpago.la/exemplo4' },
+                { id: 5, title: 'Jantar à luz de velas', price: 550.00, desc: 'Um jantar inesquecível em um restaurante especial.', image: 'https://images.unsplash.com/photo-1507914464562-6ffec67561bd?q=80&w=500', link: 'https://mpago.la/exemplo5' },
+                { id: 6, title: 'Passeio de Barco', price: 420.00, desc: 'Um tour relaxante ao pôr do sol na lua de mel.', image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=500', link: 'https://mpago.la/exemplo6' },
+                { id: 7, title: 'Jogo de Jantar 42 peças', price: 890.00, desc: 'Porcelana fina para recebermos vocês em nossa casa.', image: 'https://images.unsplash.com/photo-1577108310694-51352132aa27?q=80&w=500', link: 'https://mpago.la/exemplo7' },
+                { id: 8, title: 'Smart TV 50 polegadas', price: 2400.00, desc: 'Para nossas maratonas de filmes e séries.', image: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=500', link: 'https://mpago.la/exemplo8' },
+                { id: 9, title: 'Faqueiro Inox 101 peças', price: 650.00, desc: 'Qualidade e elegância para nossa cozinha.', image: 'https://images.unsplash.com/photo-1591192849226-805218731778?q=80&w=500', link: 'https://mpago.la/exemplo9' },
+                { id: 10, title: 'Cafeteira Nespresso', price: 580.00, desc: 'Para começarmos o dia com o melhor aroma.', image: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?q=80&w=500', link: 'https://mpago.la/exemplo10' }
             ];
 
             return (
@@ -160,9 +148,10 @@
                         </nav>
                     </header>
 
+                    {/* Home Section */}
                     <section id="home" className="flex flex-col items-center pt-12 pb-20 px-6 text-center">
                         <div className="relative w-full max-w-4xl overflow-hidden rounded-b-[200px] mb-12 shadow-sm border border-slate-50">
-                            <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1200" className="w-full h-[400px] md:h-[600px] object-cover" />
+                            <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1200" className="w-full h-[400px] md:h-[600px] object-cover" alt="Banner Casamento" />
                         </div>
                         <h1 className="text-6xl md:text-8xl font-dancing mb-6 text-slate-900">{COUPLE_NAMES}</h1>
                         <div className="flex flex-col items-center space-y-4">
@@ -175,37 +164,13 @@
                         </div>
                     </section>
 
-                    <section id="cerimonia" className="bg-slate-50 py-24 px-6">
-                        <div className="max-w-xl mx-auto text-center space-y-6 bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100">
-                            <h2 className="text-3xl font-playfair">A Cerimônia</h2>
-                            <p className="text-slate-500 uppercase tracking-widest text-xs font-bold">Espaço Quinta das Flores</p>
-                            <p className="text-slate-400 italic">Sábado, às 16:00 horas</p>
-                            <button className="bg-rose-100 text-rose-400 px-6 py-2 rounded-full text-[10px] font-bold tracking-widest uppercase hover:bg-rose-200 transition-all">Ver Localização</button>
-                        </div>
-                    </section>
-
-                    <section id="presentes" className="py-24 px-6 max-w-6xl mx-auto">
-                        <h2 className="text-center text-3xl font-playfair mb-16">Lista de Presentes</h2>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-                            {gifts.map(gift => (
-                                <div key={gift.id} className="bg-white border border-slate-100 rounded-[2rem] p-5 shadow-sm hover:shadow-xl transition-all flex flex-col items-center">
-                                    <div className="w-full aspect-square rounded-[1.5rem] overflow-hidden mb-6">
-                                        <img src={gift.image} className="w-full h-full object-cover" />
-                                    </div>
-                                    <h3 className="text-center font-medium text-slate-700 mb-2">{gift.title}</h3>
-                                    <p className="text-xl font-bold text-slate-900 mb-6">R$ {gift.price.toLocaleString('pt-BR')}</p>
-                                    <button className="w-full bg-[#737373] text-white py-3 rounded-xl text-xs uppercase tracking-widest font-bold">Presentear</button>
-                                </div>
-                            ))}
-                        </div>
-                    </section>
-
+                    {/* RSVP Section */}
                     <section id="rsvp" className="bg-slate-50 py-24 px-6">
                         <div className="max-w-xl mx-auto bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden min-h-[400px] flex flex-col">
                             <div className="absolute top-0 left-0 w-2 h-full bg-rose-200" />
                             <div className="text-center mb-10">
                                 <h2 className="text-3xl font-playfair mb-2">Confirmar Presença</h2>
-                                <p className="text-slate-400 text-xs italic">Digite o nome conforme o convite.</p>
+                                <p className="text-slate-400 text-xs italic">Busca inteligente por nome.</p>
                             </div>
 
                             {finished ? (
@@ -213,9 +178,9 @@
                                     <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
                                         <span className="text-green-500 text-2xl">✓</span>
                                     </div>
-                                    <h3 className="text-2xl font-playfair text-slate-800 mb-2">Obrigado!</h3>
-                                    <p className="text-slate-500">Sua resposta foi enviada.</p>
-                                    <button onClick={() => { setFinished(false); setGroupedResults(null); setSelectedInvite(null); setSearchName(''); }} className="mt-8 text-rose-300 font-bold uppercase text-[10px] tracking-widest border-b border-rose-100 inline-block mx-auto">Confirmar outro convite</button>
+                                    <h3 className="text-2xl font-playfair text-slate-800 mb-2">Presença Confirmada!</h3>
+                                    <p className="text-slate-500">Obrigado por responder.</p>
+                                    <button onClick={() => { setFinished(false); setGroupedResults(null); setSelectedInvite(null); setSearchName(''); }} className="mt-8 text-rose-300 font-bold uppercase text-[10px] tracking-widest border-b border-rose-100 inline-block mx-auto">Confirmar outro</button>
                                 </div>
                             ) : !groupedResults ? (
                                 <div className="space-y-4 animate-fade-in">
@@ -224,17 +189,17 @@
                                         value={searchName}
                                         onChange={(e) => setSearchName(e.target.value)}
                                         onKeyPress={(e) => e.key === 'Enter' && handleRSVPSearch()}
-                                        placeholder="Nome do Convite" 
+                                        placeholder="Ex: Leticia" 
                                         className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-rose-100 transition-all border border-transparent focus:border-rose-200"
                                     />
                                     {error && <p className="text-rose-500 text-[10px] text-center uppercase tracking-wider">{error}</p>}
                                     <button onClick={handleRSVPSearch} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-black transition-all disabled:opacity-50" disabled={loading}>
-                                        {loading ? "Buscando..." : "Verificar Convite"}
+                                        {loading ? "Buscando..." : "Buscar Convite"}
                                     </button>
                                 </div>
                             ) : !selectedInvite ? (
                                 <div className="animate-fade-in space-y-4">
-                                    <p className="text-center text-slate-500 text-sm mb-6">Encontramos mais de um convite. Qual é o seu?</p>
+                                    <p className="text-center text-slate-500 text-sm mb-6">Escolha o seu convite:</p>
                                     {Object.keys(groupedResults).map((name) => (
                                         <button 
                                             key={name}
@@ -245,7 +210,7 @@
                                             <span className="text-slate-300 group-hover:translate-x-1 transition-transform">→</span>
                                         </button>
                                     ))}
-                                    <button onClick={() => setGroupedResults(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Voltar para busca</button>
+                                    <button onClick={() => setGroupedResults(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Voltar</button>
                                 </div>
                             ) : (
                                 <div className="animate-fade-in">
@@ -264,7 +229,7 @@
                                                     className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${isSelected ? 'bg-white border-rose-300 shadow-md transform scale-[1.02]' : 'bg-slate-50 border-transparent opacity-70 hover:opacity-100'}`}
                                                 >
                                                     <span className={`font-medium transition-colors ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>{g.nomeIndividual}</span>
-                                                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-rose-400 border-rose-400 rotate-[360deg]' : 'border-slate-300 bg-transparent'}`}>
+                                                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-rose-400 border-rose-400' : 'border-slate-300 bg-transparent'}`}>
                                                         {isSelected && <span className="text-white text-sm font-bold">✓</span>}
                                                     </div>
                                                 </div>
@@ -274,13 +239,43 @@
                                     <button 
                                         onClick={submitRSVP} 
                                         disabled={isSubmitting}
-                                        className="w-full bg-rose-400 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-rose-500 shadow-lg shadow-rose-100 disabled:opacity-50 transform active:scale-95 transition-all"
+                                        className="w-full bg-rose-400 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-rose-500 shadow-lg shadow-rose-100 disabled:opacity-50 transition-all"
                                     >
                                         {isSubmitting ? "Enviando..." : "Confirmar Presença"}
                                     </button>
                                     <button onClick={() => setSelectedInvite(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Trocar convite</button>
                                 </div>
                             )}
+                        </div>
+                    </section>
+
+                    {/* Gifts Section */}
+                    <section id="presentes" className="py-24 px-6 max-w-6xl mx-auto">
+                        <div className="text-center mb-16">
+                            <h2 className="text-4xl font-playfair mb-4">Lista de Presentes</h2>
+                            <p className="text-slate-400 text-sm max-w-lg mx-auto italic">Contribua para nossa nova etapa de vida.</p>
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                            {gifts.map(gift => (
+                                <div key={gift.id} className="bg-white group rounded-[2.5rem] p-4 border border-slate-50 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col">
+                                    <div className="w-full aspect-square rounded-[2rem] overflow-hidden mb-6 relative">
+                                        <img src={gift.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={gift.title} />
+                                    </div>
+                                    <div className="px-2 flex-grow flex flex-col">
+                                        <h3 className="text-xl font-playfair text-slate-800 mb-2">{gift.title}</h3>
+                                        <p className="text-slate-400 text-[11px] mb-4 line-clamp-2">{gift.desc}</p>
+                                        <div className="mt-auto flex justify-between items-center pt-4 border-t border-slate-50">
+                                            <p className="text-lg font-bold text-slate-900">R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                            <button 
+                                                onClick={() => window.open(gift.link, '_blank')}
+                                                className="bg-slate-900 text-white px-5 py-3 rounded-xl text-[9px] uppercase tracking-widest font-bold hover:bg-black transition-all"
+                                            >
+                                                Presentear
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
                         </div>
                     </section>
 
