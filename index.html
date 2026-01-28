@@ -56,6 +56,11 @@
                 return () => clearInterval(timer);
             }, []);
 
+            // Função para gerar uma chave única mesmo se o backend falhar nos IDs
+            const getUniqueKey = (guest) => {
+                return `${guest.rowId}-${guest.nomeIndividual}`.replace(/\s+/g, '');
+            };
+
             const handleRSVPSearch = async () => {
                 if (searchName.trim().length < 3) {
                     setError('Por favor, digite pelo menos 3 letras.');
@@ -98,21 +103,20 @@
             const selectInvite = (name, guests) => {
                 const initialAttendance = {};
                 guests.forEach(g => {
-                    // Garantimos que a chave seja uma string única (rowId)
-                    initialAttendance[String(g.rowId)] = g.situacao === "Confirmado";
+                    const key = getUniqueKey(g);
+                    initialAttendance[key] = g.situacao === "Confirmado";
                 });
                 setAttendance(initialAttendance);
                 setSelectedInvite({ name, guests });
             };
 
-            const toggleAttendance = (e, rowId) => {
-                // Evita propagação caso haja elementos aninhados
-                e.preventDefault();
-                const key = String(rowId);
-                setAttendance(prev => ({
-                    ...prev,
-                    [key]: !prev[key]
-                }));
+            const toggleAttendance = (guest) => {
+                const key = getUniqueKey(guest);
+                setAttendance(prev => {
+                    const newState = { ...prev };
+                    newState[key] = !prev[key];
+                    return newState;
+                });
             };
 
             const submitRSVP = async () => {
@@ -120,7 +124,7 @@
                 const payload = selectedInvite.guests.map(g => ({
                     rowId: g.rowId,
                     nomeIndividual: g.nomeIndividual,
-                    presente: !!attendance[String(g.rowId)]
+                    presente: !!attendance[getUniqueKey(g)]
                 }));
                 
                 try {
@@ -251,11 +255,12 @@
                                     </div>
                                     <div className="space-y-3 mb-8">
                                         {selectedInvite.guests.map((g) => {
-                                            const isSelected = !!attendance[String(g.rowId)];
+                                            const uKey = getUniqueKey(g);
+                                            const isSelected = !!attendance[uKey];
                                             return (
                                                 <div 
-                                                    key={String(g.rowId)} 
-                                                    onClick={(e) => toggleAttendance(e, g.rowId)} 
+                                                    key={uKey} 
+                                                    onClick={() => toggleAttendance(g)} 
                                                     className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${isSelected ? 'bg-white border-rose-300 shadow-md transform scale-[1.02]' : 'bg-slate-50 border-transparent opacity-70 hover:opacity-100'}`}
                                                 >
                                                     <span className={`font-medium transition-colors ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>{g.nomeIndividual}</span>
