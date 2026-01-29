@@ -26,11 +26,88 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
+        // ==========================================
+        // ÁREA DE CONFIGURAÇÃO DO CASAMENTO
+        // ==========================================
+        
         const WEDDING_DATE = new Date('2026-05-02T16:00:00');
         const COUPLE_NAMES = "Júlia & Vitor";
         
-        // URL ATUALIZADA FORNECIDA PELO USUÁRIO
+        // URL do Google Apps Script (Mantenha a sua URL aqui)
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB7o5ix3C9yKnmVepXES_v2C7WzzxQIKOHNL4bGTiEz1kh0l7v1pBhnfkQeX45cRzz/exec";
+
+        // LISTA DE PRESENTES - EDITE AQUI
+        // Para adicionar mais presentes, apenas copie um bloco {...} e cole abaixo, mudando o ID e os dados.
+        const GIFTS_DATA = [
+            { 
+                id: 1, 
+                title: 'Noite de Núpcias', 
+                price: 490.00, 
+                desc: 'Ajude-nos a ter uma primeira noite mágica.', 
+                image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=500', 
+                link: 'https://mpago.la/seu-link-aqui' 
+            },
+            { 
+                id: 2, 
+                title: 'Jantar Romântico', 
+                price: 350.00, 
+                desc: 'Um jantar especial à luz de velas.', 
+                image: 'https://images.unsplash.com/photo-1507914464562-6ffec67561bd?q=80&w=500', 
+                link: 'https://mpago.la/seu-link-aqui' 
+            },
+            { 
+                id: 3, 
+                title: 'Passeio de Barco', 
+                price: 420.00, 
+                desc: 'Um tour relaxante ao pôr do sol na lua de mel.', 
+                image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=500', 
+                link: 'https://mpago.la/exemplo6' 
+            },
+            { 
+                id: 4, 
+                title: 'Churrasqueira Elétrica', 
+                price: 250.00, 
+                desc: 'Para nossos almoços de domingo com a família.', 
+                image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=500', 
+                link: 'https://mpago.la/exemplo4' 
+            },
+            { 
+                id: 5, 
+                title: 'Jogo de Jantar', 
+                price: 890.00, 
+                desc: 'Porcelana fina para recebermos vocês em nossa casa.', 
+                image: 'https://images.unsplash.com/photo-1577108310694-51352132aa27?q=80&w=500', 
+                link: 'https://mpago.la/exemplo7' 
+            },
+            { 
+                id: 6, 
+                title: 'Smart TV 50"', 
+                price: 2400.00, 
+                desc: 'Para nossas maratonas de filmes e séries.', 
+                image: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=500', 
+                link: 'https://mpago.la/exemplo8' 
+            },
+            { 
+                id: 7, 
+                title: 'Faqueiro Inox', 
+                price: 650.00, 
+                desc: 'Qualidade e elegância para nossa cozinha.', 
+                image: 'https://images.unsplash.com/photo-1591192849226-805218731778?q=80&w=500', 
+                link: 'https://mpago.la/exemplo9' 
+            },
+            { 
+                id: 8, 
+                title: 'Cafeteira', 
+                price: 580.00, 
+                desc: 'Para começarmos o dia com o melhor aroma.', 
+                image: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?q=80&w=500', 
+                link: 'https://mpago.la/exemplo10' 
+            }
+        ];
+
+        // ==========================================
+        // FIM DA CONFIGURAÇÃO
+        // ==========================================
         
         const App = () => {
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -123,19 +200,6 @@
                     setIsSubmitting(false);
                 }
             };
-
-            const gifts = [
-                { id: 1, title: 'Brinde da noite de núpcias', price: 491.71, desc: 'Champagne e frutas para nossa primeira noite.', image: 'https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=500', link: 'https://mpago.la/exemplo1' },
-                { id: 2, title: 'Brunch honeymoon no quarto', price: 268.49, desc: 'Café da manhã completo servido no quarto.', image: 'https://images.unsplash.com/photo-1533089860892-a7c6f0a88666?q=80&w=500', link: 'https://mpago.la/exemplo2' },
-                { id: 3, title: 'Café da manhã romântico', price: 361.65, desc: 'Um despertar especial em um café charmoso.', image: 'https://images.unsplash.com/photo-1495214781650-648ac8046fe1?q=80&w=500', link: 'https://mpago.la/exemplo3' },
-                { id: 4, title: 'Churrasqueira Elétrica', price: 250.00, desc: 'Para nossos almoços de domingo com a família.', image: 'https://images.unsplash.com/photo-1555507036-ab1f4038808a?q=80&w=500', link: 'https://mpago.la/exemplo4' },
-                { id: 5, title: 'Jantar à luz de velas', price: 550.00, desc: 'Um jantar inesquecível em um restaurante especial.', image: 'https://images.unsplash.com/photo-1507914464562-6ffec67561bd?q=80&w=500', link: 'https://mpago.la/exemplo5' },
-                { id: 6, title: 'Passeio de Barco', price: 420.00, desc: 'Um tour relaxante ao pôr do sol na lua de mel.', image: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=500', link: 'https://mpago.la/exemplo6' },
-                { id: 7, title: 'Jogo de Jantar 42 peças', price: 890.00, desc: 'Porcelana fina para recebermos vocês em nossa casa.', image: 'https://images.unsplash.com/photo-1577108310694-51352132aa27?q=80&w=500', link: 'https://mpago.la/exemplo7' },
-                { id: 8, title: 'Smart TV 50 polegadas', price: 2400.00, desc: 'Para nossas maratonas de filmes e séries.', image: 'https://images.unsplash.com/photo-1593305841991-05c297ba4575?q=80&w=500', link: 'https://mpago.la/exemplo8' },
-                { id: 9, title: 'Faqueiro Inox 101 peças', price: 650.00, desc: 'Qualidade e elegância para nossa cozinha.', image: 'https://images.unsplash.com/photo-1591192849226-805218731778?q=80&w=500', link: 'https://mpago.la/exemplo9' },
-                { id: 10, title: 'Cafeteira Nespresso', price: 580.00, desc: 'Para começarmos o dia com o melhor aroma.', image: 'https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?q=80&w=500', link: 'https://mpago.la/exemplo10' }
-            ];
 
             return (
                 <div className="min-h-screen">
@@ -256,7 +320,7 @@
                             <p className="text-slate-400 text-sm max-w-lg mx-auto italic">Contribua para nossa nova etapa de vida.</p>
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
-                            {gifts.map(gift => (
+                            {GIFTS_DATA.map(gift => (
                                 <div key={gift.id} className="bg-white group rounded-[2.5rem] p-4 border border-slate-50 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col">
                                     <div className="w-full aspect-square rounded-[2rem] overflow-hidden mb-6 relative">
                                         <img src={gift.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={gift.title} />
