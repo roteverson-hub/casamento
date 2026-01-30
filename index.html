@@ -18,6 +18,12 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         .scroll-smooth { scroll-behavior: smooth; }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #fff; }
+        ::-webkit-scrollbar-thumb { background: #fecdd3; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fda4af; }
     </style>
 </head>
 <body class="bg-white text-slate-800 antialiased selection:bg-rose-100 scroll-smooth">
@@ -30,14 +36,32 @@
         // ÁREA DE CONFIGURAÇÃO DO CASAMENTO
         // ==========================================
         
-        const WEDDING_DATE = new Date('2026-05-02T16:00:00');
+        // Ajustado para 16:30 conforme solicitado
+        const WEDDING_DATE = new Date('2026-05-02T16:30:00');
         const COUPLE_NAMES = "Júlia & Vitor";
         
-        // URL do Google Apps Script (Mantenha a sua URL aqui)
+        // URL do Google Apps Script
         const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB7o5ix3C9yKnmVepXES_v2C7WzzxQIKOHNL4bGTiEz1kh0l7v1pBhnfkQeX45cRzz/exec";
 
-        // LISTA DE PRESENTES - EDITE AQUI
-        // Para adicionar mais presentes, apenas copie um bloco {...} e cole abaixo, mudando o ID e os dados.
+        // FOTOS DO CASAL
+        const COUPLE_PHOTOS = [
+            "https://i.postimg.cc/tTQz5cZR/fot1.jpg",
+            "https://i.postimg.cc/wv8kVryT/fot2.jpg",
+            "https://i.postimg.cc/B69CgzLG/fot3.jpg",
+            "https://i.postimg.cc/0QRCf4Mx/fot4.jpg",
+            "https://i.postimg.cc/Pq841Hx5/fot5.jpg",
+            "https://i.postimg.cc/pTbBZShv/fot6.jpg"
+        ];
+
+        // FOTOS DO LOCAL
+        const VENUE_PHOTOS = [
+            "https://i.postimg.cc/T1BFq06z/belluno_1.jpg",
+            "https://i.postimg.cc/054Tskwy/belluno_2.jpg",
+            "https://i.postimg.cc/SQPBhSMQ/belluno_3.jpg",
+            "https://i.postimg.cc/NGn3csHs/belluno_4.jpg"
+        ];
+
+        // LISTA DE PRESENTES
         const GIFTS_DATA = [
             { 
                 id: 1, 
@@ -331,27 +355,98 @@
 
             return (
                 <div className="min-h-screen">
-                    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-100 px-6 py-4">
-                        <nav className="max-w-6xl mx-auto flex flex-wrap justify-center gap-4 md:gap-8 text-[10px] md:text-xs uppercase tracking-[0.2em] font-medium text-slate-500">
-                            <a href="#home" className="hover:text-slate-900 transition-colors">Home</a>
-                            <a href="#cerimonia" className="hover:text-slate-900 transition-colors">Cerimônia</a>
-                            <a href="#presentes" className="hover:text-slate-900 transition-colors">Presentes</a>
-                            <a href="#rsvp" className="hover:text-slate-900 transition-colors">RSVP</a>
+                    {/* Navigation */}
+                    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-rose-50 px-6 py-4 shadow-sm">
+                        <nav className="max-w-6xl mx-auto flex flex-wrap justify-center gap-6 md:gap-10 text-[11px] md:text-xs uppercase tracking-[0.2em] font-medium text-slate-500">
+                            <a href="#home" className="hover:text-rose-400 transition-colors">Home</a>
+                            <a href="#cerimonia" className="hover:text-rose-400 transition-colors">Cerimônia</a>
+                            <a href="#presentes" className="hover:text-rose-400 transition-colors">Presentes</a>
+                            <a href="#rsvp" className="hover:text-rose-400 transition-colors">RSVP</a>
                         </nav>
                     </header>
 
                     {/* Home Section */}
-                    <section id="home" className="flex flex-col items-center pt-12 pb-20 px-6 text-center">
-                        <div className="relative w-full max-w-4xl overflow-hidden rounded-b-[200px] mb-12 shadow-sm border border-slate-50">
-                            <img src="https://images.unsplash.com/photo-1520854221256-17451cc331bf?q=80&w=1200" className="w-full h-[400px] md:h-[600px] object-cover" alt="Banner Casamento" />
+                    <section id="home" className="pt-16 pb-20 px-4 md:px-6 flex flex-col items-center text-center max-w-7xl mx-auto">
+                        <h1 className="text-7xl md:text-9xl font-dancing mb-6 text-slate-900 drop-shadow-sm animate-fade-in">
+                            {COUPLE_NAMES}
+                        </h1>
+                        <p className="text-slate-400 uppercase tracking-[0.4em] text-xs md:text-sm mb-12 animate-fade-in animation-delay-200">
+                            Bem-vindos ao nosso grande dia
+                        </p>
+
+                        {/* Photo Grid - Masonry Style */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full animate-fade-in">
+                            {COUPLE_PHOTOS.map((photo, index) => (
+                                <div key={index} className={`relative overflow-hidden rounded-2xl md:rounded-[2rem] group cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 ${index === 0 ? 'md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto' : 'aspect-square'}`}>
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10" />
+                                    <img 
+                                        src={photo} 
+                                        alt={`Foto Casal ${index + 1}`} 
+                                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
+                                    />
+                                </div>
+                            ))}
                         </div>
-                        <h1 className="text-6xl md:text-8xl font-dancing mb-6 text-slate-900">{COUPLE_NAMES}</h1>
-                        <div className="flex flex-col items-center space-y-4">
-                            <span className="text-2xl md:text-3xl font-playfair tracking-[0.15em] text-slate-700">02.05.2026</span>
-                            <div className="flex gap-4 md:gap-8 uppercase tracking-widest text-[10px] md:text-xs text-slate-400">
-                                <div><span className="block text-xl md:text-2xl text-slate-700 font-bold">{timeLeft.days}</span> Dias</div>
-                                <div><span className="block text-xl md:text-2xl text-slate-700 font-bold">{timeLeft.hours}</span> Hrs</div>
-                                <div><span className="block text-xl md:text-2xl text-slate-700 font-bold">{timeLeft.minutes}</span> Min</div>
+                    </section>
+
+                    {/* Ceremony Section (NOVA SESSÃO) */}
+                    <section id="cerimonia" className="bg-rose-50/30 py-24 px-6 border-t border-rose-50">
+                        <div className="max-w-6xl mx-auto">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                                {/* Left Content: Info */}
+                                <div className="text-center lg:text-left space-y-8 animate-fade-in">
+                                    <div>
+                                        <h2 className="text-4xl md:text-5xl font-playfair mb-2 text-slate-900">A Cerimônia</h2>
+                                        <div className="h-1 w-20 bg-rose-200 mx-auto lg:mx-0 rounded-full"></div>
+                                    </div>
+                                    
+                                    <div className="space-y-2">
+                                        <p className="text-3xl md:text-4xl font-playfair text-slate-700">02 de Maio de 2026</p>
+                                        <p className="text-xl text-slate-500 font-light">às 16:30 horas</p>
+                                    </div>
+
+                                    {/* Countdown */}
+                                    <div className="flex justify-center lg:justify-start gap-4 md:gap-6">
+                                        {[
+                                            { label: 'Dias', value: timeLeft.days },
+                                            { label: 'Horas', value: timeLeft.hours },
+                                            { label: 'Min', value: timeLeft.minutes },
+                                            { label: 'Seg', value: timeLeft.seconds }
+                                        ].map((item) => (
+                                            <div key={item.label} className="bg-white p-4 rounded-2xl shadow-sm border border-rose-50 w-20 md:w-24">
+                                                <span className="block text-2xl md:text-3xl font-bold text-rose-400 font-playfair">{item.value}</span>
+                                                <span className="text-[10px] uppercase tracking-wider text-slate-400">{item.label}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Location */}
+                                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-rose-50 relative overflow-hidden group">
+                                        <div className="absolute top-0 right-0 w-20 h-20 bg-rose-100 rounded-bl-[100px] opacity-20 transition-transform group-hover:scale-150 duration-700"></div>
+                                        <h3 className="text-xl font-bold uppercase tracking-widest mb-3 text-slate-800">Espaço Beluno</h3>
+                                        <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+                                            Av. Dr. Joaquim Craveiro de Sá, quadra B1 lote 12<br/>
+                                            Expansul, Aparecida de Goiânia - GO<br/>
+                                            CEP: 74986-320
+                                        </p>
+                                        <a 
+                                            href="https://maps.app.goo.gl/xVw6fqBjbb7mFrNu9" 
+                                            target="_blank"
+                                            className="inline-flex items-center gap-2 text-rose-400 text-xs font-bold uppercase tracking-widest hover:text-rose-500 transition-colors border-b border-rose-200 pb-1"
+                                        >
+                                            Ver no Mapa <span>→</span>
+                                        </a>
+                                    </div>
+                                </div>
+
+                                {/* Right Content: Venue Photos */}
+                                <div className="grid grid-cols-2 gap-4 animate-fade-in">
+                                    {VENUE_PHOTOS.map((img, idx) => (
+                                        <div key={idx} className={`rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 ${idx % 2 === 0 ? 'translate-y-8' : ''}`}>
+                                            <img src={img} alt="Espaço Beluno" className="w-full h-48 md:h-64 object-cover hover:scale-110 transition-transform duration-700" />
+                                        </div>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -471,7 +566,7 @@
                         </div>
                     </section>
 
-                    <footer className="py-12 text-center text-slate-400 text-[10px] tracking-[0.3em] uppercase">
+                    <footer className="py-12 text-center text-slate-400 text-[10px] tracking-[0.3em] uppercase border-t border-slate-100">
                         <p>Com carinho, {COUPLE_NAMES}</p>
                     </footer>
                 </div>
