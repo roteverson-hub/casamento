@@ -15,9 +15,10 @@
     <style>
         @font-face {
             font-family: 'Amsterdam Four';
-            /* Quando for subir para a Vercel, coloque seu arquivo de fonte na pasta e descomente a linha abaixo: */
             src: url('./fonts/Amsterdam-Four.woff2') format('woff2');
-            src: local('Amsterdam Four'); 
+            font-weight: normal;
+            font-style: normal;
+            font-display: swap;
         }
         .font-amsterdam { font-family: 'Amsterdam Four', 'Dancing Script', cursive; }
         .font-dancing { font-family: 'Dancing Script', cursive; }
@@ -186,14 +187,14 @@
                     {/* Home Section */}
                     <section id="home" className="relative pt-24 pb-20 px-4 md:px-6 flex flex-col items-center text-center w-full">
                         {/* Imagem de Fundo Aquarela */}
-                        <div className="absolute inset-0 z-0 pointer-events-none" style={{
+                        <div className="absolute inset-x-0 top-0 mx-auto w-full max-w-4xl h-full z-0 pointer-events-none" style={{
                             backgroundImage: 'url("https://i.postimg.cc/QtfdWz2V/capa-site.jpg")',
                             backgroundPosition: 'center top',
-                            backgroundSize: 'cover',
+                            backgroundSize: 'contain',
                             backgroundRepeat: 'no-repeat',
                             opacity: 0.9,
-                            WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)',
-                            maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)'
+                            WebkitMaskImage: 'linear-gradient(to bottom, black 30vh, transparent 70vh)',
+                            maskImage: 'linear-gradient(to bottom, black 30vh, transparent 70vh)'
                         }}></div>
 
                         <div className="relative z-10 max-w-7xl mx-auto w-full flex flex-col items-center">
