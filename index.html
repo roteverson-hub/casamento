@@ -4,29 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Júlia & Vitor | Casamento</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
-    <!-- React & Babel for standalone usage -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        .font-dancing { font-family: 'Dancing Script', cursive; }
+        .font-dancing  { font-family: 'Dancing Script', cursive; }
         .font-playfair { font-family: 'Playfair Display', serif; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        .scroll-smooth { scroll-behavior: smooth; }
-        
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
+
+        /* ── Animations ── */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+        @keyframes orbFloat {
+            0%, 100% { transform: translateY(0) scale(1);   opacity: 0.18; }
+            50%       { transform: translateY(-16px) scale(1.06); opacity: 0.26; }
+        }
+
+        .anim-fade-up { animation: fadeUp 0.65s cubic-bezier(.22,1,.36,1) forwards; }
+        .anim-fade-in { animation: fadeIn 0.5s ease forwards; }
+
+        .d1 { animation-delay: 0.08s; opacity: 0; }
+        .d2 { animation-delay: 0.18s; opacity: 0; }
+        .d3 { animation-delay: 0.30s; opacity: 0; }
+        .d4 { animation-delay: 0.42s; opacity: 0; }
+        .d5 { animation-delay: 0.56s; opacity: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar       { width: 6px; }
         ::-webkit-scrollbar-track { background: #fff; }
-        ::-webkit-scrollbar-thumb { background: #fecdd3; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #fecdd3; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: #fda4af; }
+
+        /* ── Decorative orbs ── */
+        .orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(70px);
+            pointer-events: none;
+            animation: orbFloat 7s ease-in-out infinite;
+        }
+
+        /* ── Nav underline ── */
+        .nav-link { position: relative; padding-bottom: 2px; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: 1px;
+            background: #fb7185;
+            transition: width 0.3s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        /* ── Photo grid ── */
+        /*
+          Desktop: 3 cols, 2 rows. First photo spans col 1-2 and both rows.
+          Remaining 5 photos fill col 3, rows 1-2, then a third row across full width.
+          Mobile: clean 2-column grid, all square, no spanning.
+        */
+        .photo-grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        /* Mobile: 2 equal columns, all square */
+        @media (max-width: 639px) {
+            .photo-grid {
+                grid-template-columns: repeat(2, 1fr);
+                grid-auto-rows: 160px;
+            }
+            .photo-item-0 { grid-column: 1 / 3; height: 220px; }
+        }
+
+        /* Tablet+ : masonry-like layout */
+        @media (min-width: 640px) {
+            .photo-grid {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(2, 230px);
+            }
+            .photo-item-0 {
+                grid-column: 1 / 3;
+                grid-row: 1 / 3;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .photo-grid { grid-template-rows: repeat(2, 280px); }
+        }
+
+        .photo-grid > div {
+            border-radius: 18px;
+            overflow: hidden;
+            position: relative;
+        }
+        .photo-grid > div img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 0.7s cubic-bezier(.22,1,.36,1);
+            display: block;
+        }
+        .photo-grid > div:hover img { transform: scale(1.07); }
+
+        /* Countdown box */
+        .countdown-box {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .countdown-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(251,113,133,0.18);
+        }
+
+        /* Thin gradient divider */
+        .line-divider {
+            display: block;
+            width: 48px; height: 1px;
+            background: linear-gradient(90deg, transparent, #fda4af, transparent);
+            margin: 0 auto;
+        }
     </style>
 </head>
-<body class="bg-white text-slate-800 antialiased selection:bg-rose-100 scroll-smooth">
+<body class="bg-white text-slate-800 antialiased selection:bg-rose-100">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -35,14 +141,11 @@
         // ==========================================
         // ÁREA DE CONFIGURAÇÃO DO CASAMENTO
         // ==========================================
-        
-        const WEDDING_DATE = new Date('2026-05-02T16:30:00');
-        const COUPLE_NAMES = "Júlia & Vitor";
-        
-        // URL do Google Apps Script
-        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB7o5ix3C9yKnmVepXES_v2C7WzzxQIKOHNL4bGTiEz1kh0l7v1pBhnfkQeX45cRzz/exec";
 
-        // FOTOS DO CASAL
+        const WEDDING_DATE  = new Date('2026-05-02T16:30:00');
+        const COUPLE_NAMES  = "Júlia & Vitor";
+        const SCRIPT_URL    = "https://script.google.com/macros/s/AKfycbwB7o5ix3C9yKnmVepXES_v2C7WzzxQIKOHNL4bGTiEz1kh0l7v1pBhnfkQeX45cRzz/exec";
+
         const COUPLE_PHOTOS = [
             "https://i.postimg.cc/tTQz5cZR/fot1.jpg",
             "https://i.postimg.cc/wv8kVryT/fot2.jpg",
@@ -52,7 +155,6 @@
             "https://i.postimg.cc/pTbBZShv/fot6.jpg"
         ];
 
-        // FOTOS DO LOCAL
         const VENUE_PHOTOS = [
             "https://i.postimg.cc/T1BFq06z/belluno_1.jpg",
             "https://i.postimg.cc/054Tskwy/belluno_2.jpg",
@@ -60,416 +162,203 @@
             "https://i.postimg.cc/NGn3csHs/belluno_4.jpg"
         ];
 
-        // LISTA DE PRESENTES - Atualizada com linkpix e linkcartao
         const GIFTS_DATA = [
-            { 
-                id: 1, 
-                title: 'Chaleira Elétrica', 
-                price: 80.00, 
-                desc: 'Ajude o Vitor a passar o café dele pela manhã.', 
-                image: 'https://i.postimg.cc/qR0sP3k9/chaleira2.png', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d1026-4ca7-43d7-89fb-4c7f5da354f7', 
-                linkcartao: 'https://mpago.la/2sHEi1x' 
-            },
-            { 
-                id: 2, 
-                title: 'Vale primeiro Ifood de Casados', 
-                price: 120.00, 
-                desc: 'Não queremos comer arroz com danone.', 
-                image: 'https://i.postimg.cc/mDz4Gt8N/arrozdanone.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0c70-189b-4691-9772-73fbfb27ff73',
-                linkcartao: 'https://mpago.li/2By3nmz' 
-            },
-            { 
-                id: 3, 
-                title: 'Uber na Lua de Mel', 
-                price: 180.00, 
-                desc: 'Para não gastarmos a sola do sapato na Europa.', 
-                image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=500', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0c98-e6ef-4977-9779-51e03bbf7b0b',
-                linkcartao: 'https://mpago.la/22HfE8c' 
-            },
-            { 
-                id: 4, 
-                title: 'Vale Rodízio de Sushi no Nazo', 
-                price: 210.00, 
-                desc: 'NAZOOOOOOOO!', 
-                image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=500', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0cd0-bae1-4935-aa8b-60a550780ce4',
-                linkcartao: 'https://mpago.la/2G6w7NJ' 
-            },
-            { 
-                id: 5, 
-                title: 'Passagem de trem na Itália', 
-                price: 280.00, 
-                desc: 'Para fugirmos um pouquinho do navio e comer pasta.', 
-                image: 'https://i.postimg.cc/bvMXLqpD/tremitalia.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0d98-357c-47ec-8c90-830a29e0f8dc',
-                linkcartao: 'https://mpago.la/11zUoZy' 
-            },
-            { 
-                id: 6, 
-                title: 'Drinks na praia', 
-                price: 310.00, 
-                desc: 'Para ficarmos alegremente hidratados sob o sol grego.', 
-                image: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=500', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0db4-3e46-4c3a-982d-8469f3e4b9e2',
-                linkcartao: 'https://mpago.la/13UsPoJ' 
-            },
-            { 
-                id: 7, 
-                title: 'Moedor de café Hamilton Beach', 
-                price: 360.00, 
-                desc: 'Ajude o Vitor a ficar mais fresco com o café dele.', 
-                image: 'https://i.postimg.cc/ryf1Hs7D/moedorcafe.png', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0dd3-6d29-46f1-9a95-b0de170bf27b',
-                linkcartao: 'https://mpago.la/15Z5f9a' 
-            },
-            { 
-                id: 8, 
-                title: 'Pacote de Refrigerantes no Navio', 
-                price: 470.00, 
-                desc: 'Não consigo ficar sem minha coquinha zero gelada', 
-                image: 'https://i.postimg.cc/Dz3LGXbv/cocaroyal.webp', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0dec-c772-4a8f-8967-4e93e11e2383',
-                linkcartao: 'https://mpago.la/1NPyLYA' 
-            },
-            { 
-                id: 9, 
-                title: 'Passeio de barco em Veneza', 
-                price: 550.00, 
-                desc: 'Aquele momento romântico (e caro) na gôndola.', 
-                image: 'https://i.postimg.cc/TPcLWH63/capa-gondola.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e13-c2d9-418c-a925-2c03b108de9c',
-                linkcartao: 'https://mpago.la/2rgvtES' 
-            },
-            { 
-                id: 10, 
-                title: 'GTA VI', 
-                price: 600.00, 
-                desc: 'Ainda não sabemos quanto vai ser, mas é melhor estar preparado.', 
-                image: 'https://i.postimg.cc/pLbpctV5/gta.avif', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e2f-7b57-4eef-882a-bef14d094e81',
-                linkcartao: 'https://mpago.la/1txidJa' 
-            },
-            { 
-                id: 11, 
-                title: '6 Meses de alimentação pras gatas', 
-                price: 680.00, 
-                desc: 'Elas precisam ser felizes enquanto estamos fora.', 
-                image: 'https://i.postimg.cc/MGh6H7cD/gatas.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e4f-92af-46ef-9b7d-ddb32007a049',
-                linkcartao: 'https://mpago.la/2sUWXaD' 
-            },
-            { 
-                id: 12, 
-                title: 'Passeio em King\'s Landing', 
-                price: 780.00, 
-                desc: 'The winter is coming (em Dubrovnik).', 
-                image: 'https://i.postimg.cc/MpLx37YJ/kings.webp', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e6d-b2ee-4db2-ba68-00a49c85a4a9',
-                linkcartao: 'https://mpago.la/1Phyon6' 
-            },
-            { 
-                id: 13, 
-                title: 'Coral para cantar "Aleluia"', 
-                price: 850.00, 
-                desc: 'Para a entrada triunfal do noivo.', 
-                image: 'https://i.postimg.cc/MKKSWPsh/coral.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e8a-1c44-415b-b9b6-9e30dd3fbe08',
-                linkcartao: 'https://mpago.la/2MDVQ3S' 
-            },
-            { 
-                id: 14, 
-                title: 'Faca Flip Blue Steel MW', 
-                price: 900.00, 
-                desc: 'Item essencial para a segurança digital do noivo.', 
-                image: 'https://i.postimg.cc/jjNV8G5X/flip.png', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0eb8-8f5d-4a72-88aa-a2c5ce1fc429',
-                linkcartao: 'https://mpago.la/link-pagamento' 
-            },
-            { 
-                id: 15, 
-                title: 'Pacote de bebidas Refrescantes no navio', 
-                price: 970.00, 
-                desc: 'Para a Júlia poder tomar o suco dela também.', 
-                image: 'https://i.postimg.cc/gkrTSftn/refresh.webp', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0edd-ffc2-4e82-ad2c-91b60b170304',
-                linkcartao: 'https://mpago.la/18DKgks' 
-            },
-            { 
-                id: 16, 
-                title: 'Passeio pela Grécia', 
-                price: 1360.00, 
-                desc: 'Para quebrarmos alguns pratos e gritarmos OPA!', 
-                image: 'https://images.unsplash.com/photo-1603565816030-6b389eeb23cb?q=80&w=500', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f08-ddfb-4e4b-b4f9-230892f9a881',
-                linkcartao: 'https://mpago.la/2JbLtbk' 
-            },
-            { 
-                id: 17, 
-                title: 'Vale subir no palco', 
-                price: 1500.00, 
-                desc: 'Você pode dançar em cima do palco no casamento!', 
-                image: 'https://i.postimg.cc/L6ZVZR0h/palco.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f36-3930-4eb4-9908-61d95567d6c3',
-                linkcartao: 'https://mpago.la/1DV9SyM' 
-            },
-            { 
-                id: 18, 
-                title: 'Tour por Atenas', 
-                price: 1800.00, 
-                desc: 'Precisamos discutir filosofia no Areópago', 
-                image: 'https://i.postimg.cc/90wyTt1j/atena.webp', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f54-daad-463d-bd30-e23dcde4d2a1',
-                linkcartao: 'https://mpago.la/2YuGUxw' 
-            },
-            { 
-                id: 19, 
-                title: 'Ultimate Santorini Full Day Tour', 
-                price: 2300.00, 
-                desc: 'Por favor alguém me dá esse aqui!!!!!!', 
-                image: 'https://i.postimg.cc/sDSNCpzt/santorini-greece-oia-white-blue.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f75-3df4-4624-a82d-a3c828635520',
-                linkcartao: 'https://mpago.la/26wrHiw' 
-            },
-            { 
-                id: 20, 
-                title: 'Pacote Bebidas Luxo Navio', 
-                price: 2527.00, 
-                desc: 'Merecemos beber champanhe olhando pro mar mediterrâneo.', 
-                image: 'https://i.postimg.cc/NfhdD5XX/bebidas.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f92-46c6-4b23-8cb6-64bcbe7ef644',
-                linkcartao: 'https://mpago.la/1eo5fS3' 
-            },
-            { 
-                id: 21, 
-                title: 'Passeio de Barco e Mergulho em Santorini', 
-                price: 3000.00, 
-                desc: 'Mergulhar nas águas cristalinas para ver se achamos Atlântida.', 
-                image: 'https://i.postimg.cc/htsMKs5Z/atividade-mergulho-santorini.webp', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0faf-b56d-4d4c-bc56-04ce1fbb463d',
-                linkcartao: 'https://mpago.la/27csP8a' 
-            },
-            { 
-                id: 22, 
-                title: 'Geladeira Reserva', 
-                price: 4500.00, 
-                desc: 'Espero que a nossa não estrague, mas vai que...', 
-                image: 'https://i.postimg.cc/YqwxgTcd/geladeira.avif', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0fc6-bcc8-468e-97d4-9e00c97d62fd',
-                linkcartao: 'https://mpago.la/1bb5pPM' 
-            },
-            { 
-                id: 23, 
-                title: 'Vale Discurso no Casamento', 
-                price: 5000.00, 
-                desc: 'Compre o direito de falar no microfone (sem garantias de que não cortaremos o som).', 
-                image: 'https://i.postimg.cc/zGxwsBLJ/discurso.jpg', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0fe2-e783-4b79-860a-b2e6f3b9931b',
-                linkcartao: 'https://mpago.la/1cFVt1K' 
-            },
-            { 
-                id: 24, 
-                title: 'Faca Butterfly Slaughter MW', 
-                price: 8176.28, 
-                desc: 'O Vitor jura que é um investimento melhor que a poupança.', 
-                image: 'https://i.postimg.cc/g0zy5pSk/360fx360f.png', 
-                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d1001-fcf7-4c9a-95a0-ff808661a131',
-                linkcartao: 'https://mpago.la/2LxE5TE' 
-            }
+            { id: 1,  title: 'Chaleira Elétrica',                    price: 80.00,    desc: 'Ajude o Vitor a passar o café dele pela manhã.',                              image: 'https://i.postimg.cc/qR0sP3k9/chaleira2.png',                                              linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d1026-4ca7-43d7-89fb-4c7f5da354f7', linkcartao: 'https://mpago.la/2sHEi1x'        },
+            { id: 2,  title: 'Vale primeiro Ifood de Casados',        price: 120.00,   desc: 'Não queremos comer arroz com danone.',                                         image: 'https://i.postimg.cc/mDz4Gt8N/arrozdanone.jpg',                                           linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0c70-189b-4691-9772-73fbfb27ff73', linkcartao: 'https://mpago.li/2By3nmz'        },
+            { id: 3,  title: 'Uber na Lua de Mel',                   price: 180.00,   desc: 'Para não gastarmos a sola do sapato na Europa.',                              image: 'https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=500',               linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0c98-e6ef-4977-9779-51e03bbf7b0b', linkcartao: 'https://mpago.la/22HfE8c'        },
+            { id: 4,  title: 'Vale Rodízio de Sushi no Nazo',        price: 210.00,   desc: 'NAZOOOOOOOO!',                                                                 image: 'https://images.unsplash.com/photo-1553621042-f6e147245754?q=80&w=500',                   linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0cd0-bae1-4935-aa8b-60a550780ce4', linkcartao: 'https://mpago.la/2G6w7NJ'        },
+            { id: 5,  title: 'Passagem de trem na Itália',           price: 280.00,   desc: 'Para fugirmos um pouquinho do navio e comer pasta.',                          image: 'https://i.postimg.cc/bvMXLqpD/tremitalia.jpg',                                            linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0d98-357c-47ec-8c90-830a29e0f8dc', linkcartao: 'https://mpago.la/11zUoZy'        },
+            { id: 6,  title: 'Drinks na praia',                      price: 310.00,   desc: 'Para ficarmos alegremente hidratados sob o sol grego.',                       image: 'https://images.unsplash.com/photo-1516483638261-f4dbaf036963?q=80&w=500',               linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0db4-3e46-4c3a-982d-8469f3e4b9e2', linkcartao: 'https://mpago.la/13UsPoJ'        },
+            { id: 7,  title: 'Moedor de café Hamilton Beach',        price: 360.00,   desc: 'Ajude o Vitor a ficar mais fresco com o café dele.',                          image: 'https://i.postimg.cc/ryf1Hs7D/moedorcafe.png',                                           linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0dd3-6d29-46f1-9a95-b0de170bf27b', linkcartao: 'https://mpago.la/15Z5f9a'        },
+            { id: 8,  title: 'Pacote de Refrigerantes no Navio',     price: 470.00,   desc: 'Não consigo ficar sem minha coquinha zero gelada',                            image: 'https://i.postimg.cc/Dz3LGXbv/cocaroyal.webp',                                           linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0dec-c772-4a8f-8967-4e93e11e2383', linkcartao: 'https://mpago.la/1NPyLYA'        },
+            { id: 9,  title: 'Passeio de barco em Veneza',           price: 550.00,   desc: 'Aquele momento romântico (e caro) na gôndola.',                               image: 'https://i.postimg.cc/TPcLWH63/capa-gondola.jpg',                                         linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e13-c2d9-418c-a925-2c03b108de9c', linkcartao: 'https://mpago.la/2rgvtES'        },
+            { id: 10, title: 'GTA VI',                               price: 600.00,   desc: 'Ainda não sabemos quanto vai ser, mas é melhor estar preparado.',             image: 'https://i.postimg.cc/pLbpctV5/gta.avif',                                                 linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e2f-7b57-4eef-882a-bef14d094e81', linkcartao: 'https://mpago.la/1txidJa'        },
+            { id: 11, title: '6 Meses de alimentação pras gatas',    price: 680.00,   desc: 'Elas precisam ser felizes enquanto estamos fora.',                            image: 'https://i.postimg.cc/MGh6H7cD/gatas.jpg',                                                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e4f-92af-46ef-9b7d-ddb32007a049', linkcartao: 'https://mpago.la/2sUWXaD'        },
+            { id: 12, title: "Passeio em King's Landing",            price: 780.00,   desc: 'The winter is coming (em Dubrovnik).',                                        image: 'https://i.postimg.cc/MpLx37YJ/kings.webp',                                               linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e6d-b2ee-4db2-ba68-00a49c85a4a9', linkcartao: 'https://mpago.la/1Phyon6'        },
+            { id: 13, title: 'Coral para cantar "Aleluia"',          price: 850.00,   desc: 'Para a entrada triunfal do noivo.',                                           image: 'https://i.postimg.cc/MKKSWPsh/coral.jpg',                                                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0e8a-1c44-415b-b9b6-9e30dd3fbe08', linkcartao: 'https://mpago.la/2MDVQ3S'        },
+            { id: 14, title: 'Faca Flip Blue Steel MW',              price: 900.00,   desc: 'Item essencial para a segurança digital do noivo.',                           image: 'https://i.postimg.cc/jjNV8G5X/flip.png',                                                 linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0eb8-8f5d-4a72-88aa-a2c5ce1fc429', linkcartao: 'https://mpago.la/link-pagamento'  },
+            { id: 15, title: 'Pacote de bebidas Refrescantes',       price: 970.00,   desc: 'Para a Júlia poder tomar o suco dela também.',                                image: 'https://i.postimg.cc/gkrTSftn/refresh.webp',                                             linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0edd-ffc2-4e82-ad2c-91b60b170304', linkcartao: 'https://mpago.la/18DKgks'        },
+            { id: 16, title: 'Passeio pela Grécia',                  price: 1360.00,  desc: 'Para quebrarmos alguns pratos e gritarmos OPA!',                              image: 'https://images.unsplash.com/photo-1603565816030-6b389eeb23cb?q=80&w=500',               linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f08-ddfb-4e4b-b4f9-230892f9a881', linkcartao: 'https://mpago.la/2JbLtbk'        },
+            { id: 17, title: 'Vale subir no palco',                  price: 1500.00,  desc: 'Você pode dançar em cima do palco no casamento!',                             image: 'https://i.postimg.cc/L6ZVZR0h/palco.jpg',                                                linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f36-3930-4eb4-9908-61d95567d6c3', linkcartao: 'https://mpago.la/1DV9SyM'        },
+            { id: 18, title: 'Tour por Atenas',                      price: 1800.00,  desc: 'Precisamos discutir filosofia no Areópago',                                   image: 'https://i.postimg.cc/90wyTt1j/atena.webp',                                               linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f54-daad-463d-bd30-e23dcde4d2a1', linkcartao: 'https://mpago.la/2YuGUxw'        },
+            { id: 19, title: 'Ultimate Santorini Full Day Tour',     price: 2300.00,  desc: 'Por favor alguém me dá esse aqui!!!!!!',                                      image: 'https://i.postimg.cc/sDSNCpzt/santorini-greece-oia-white-blue.jpg',                     linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f75-3df4-4624-a82d-a3c828635520', linkcartao: 'https://mpago.la/26wrHiw'        },
+            { id: 20, title: 'Pacote Bebidas Luxo Navio',            price: 2527.00,  desc: 'Merecemos beber champanhe olhando pro mar mediterrâneo.',                     image: 'https://i.postimg.cc/NfhdD5XX/bebidas.jpg',                                              linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0f92-46c6-4b23-8cb6-64bcbe7ef644', linkcartao: 'https://mpago.la/1eo5fS3'        },
+            { id: 21, title: 'Passeio de Barco e Mergulho',         price: 3000.00,  desc: 'Mergulhar nas águas cristalinas para ver se achamos Atlântida.',              image: 'https://i.postimg.cc/htsMKs5Z/atividade-mergulho-santorini.webp',                      linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0faf-b56d-4d4c-bc56-04ce1fbb463d', linkcartao: 'https://mpago.la/27csP8a'        },
+            { id: 22, title: 'Geladeira Reserva',                    price: 4500.00,  desc: 'Espero que a nossa não estrague, mas vai que...',                             image: 'https://i.postimg.cc/YqwxgTcd/geladeira.avif',                                           linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0fc6-bcc8-468e-97d4-9e00c97d62fd', linkcartao: 'https://mpago.la/1bb5pPM'        },
+            { id: 23, title: 'Vale Discurso no Casamento',           price: 5000.00,  desc: 'Compre o direito de falar no microfone (sem garantias de que não cortaremos o som).', image: 'https://i.postimg.cc/zGxwsBLJ/discurso.jpg',                               linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d0fe2-e783-4b79-860a-b2e6f3b9931b', linkcartao: 'https://mpago.la/1cFVt1K'        },
+            { id: 24, title: 'Faca Butterfly Slaughter MW',          price: 8176.28,  desc: 'O Vitor jura que é um investimento melhor que a poupança.',                   image: 'https://i.postimg.cc/g0zy5pSk/360fx360f.png',                                            linkpix: 'https://nubank.com.br/cobrar/gdhgi/697d1001-fcf7-4c9a-95a0-ff808661a131', linkcartao: 'https://mpago.la/2LxE5TE'        },
         ];
 
         // ==========================================
         // FIM DA CONFIGURAÇÃO
         // ==========================================
-        
+
         const App = () => {
-            const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-            const [searchName, setSearchName] = useState('');
-            const [loading, setLoading] = useState(false);
-            const [groupedResults, setGroupedResults] = useState(null); 
-            const [selectedInvite, setSelectedInvite] = useState(null); 
-            const [error, setError] = useState('');
-            const [attendance, setAttendance] = useState({}); 
-            const [isSubmitting, setIsSubmitting] = useState(false);
-            const [finished, setFinished] = useState(false);
-            
-            // Estado para o Modal de Presentes
+            const [timeLeft, setTimeLeft]         = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            const [searchName, setSearchName]     = useState('');
+            const [loading, setLoading]           = useState(false);
+            const [groupedResults, setGrouped]    = useState(null);
+            const [selectedInvite, setInvite]     = useState(null);
+            const [error, setError]               = useState('');
+            const [attendance, setAttendance]     = useState({});
+            const [isSubmitting, setSubmitting]   = useState(false);
+            const [finished, setFinished]         = useState(false);
             const [selectedGift, setSelectedGift] = useState(null);
 
             useEffect(() => {
                 const timer = setInterval(() => {
-                    const now = new Date();
-                    const difference = WEDDING_DATE.getTime() - now.getTime();
+                    const diff = WEDDING_DATE.getTime() - Date.now();
                     setTimeLeft({
-                        days: Math.max(0, Math.floor(difference / (1000 * 60 * 60 * 24))),
-                        hours: Math.max(0, Math.floor((difference / (1000 * 60 * 60)) % 24)),
-                        minutes: Math.max(0, Math.floor((difference / 1000 / 60) % 60)),
-                        seconds: Math.max(0, Math.floor((difference / 1000) % 60))
+                        days:    Math.max(0, Math.floor(diff / 86400000)),
+                        hours:   Math.max(0, Math.floor((diff / 3600000) % 24)),
+                        minutes: Math.max(0, Math.floor((diff / 60000) % 60)),
+                        seconds: Math.max(0, Math.floor((diff / 1000) % 60)),
                     });
                 }, 1000);
                 return () => clearInterval(timer);
             }, []);
 
-            const getUniqueKey = (guest) => `${guest.rowId}-${guest.nomeIndividual}`.replace(/\s+/g, '');
+            const getKey = (g) => `${g.rowId}-${g.nomeIndividual}`.replace(/\s+/g, '');
 
-            const handleRSVPSearch = async () => {
-                const query = searchName.trim();
-                
-                if (query.length < 3) {
-                    setError('Por favor, digite pelo menos 3 letras.');
-                    return;
-                }
-                setError('');
-                setLoading(true);
+            const handleSearch = async () => {
+                const q = searchName.trim();
+                if (q.length < 3) { setError('Por favor, digite pelo menos 3 letras.'); return; }
+                setError(''); setLoading(true);
                 try {
-                    const response = await fetch(`${SCRIPT_URL}?nome=${encodeURIComponent(query)}`);
-                    const data = await response.json();
-                    
-                    if (data && data.length > 0) {
-                        const groups = data.reduce((acc, curr) => {
-                            const key = curr.nomeConvite;
-                            if (!acc[key]) acc[key] = [];
-                            acc[key].push(curr);
+                    const res  = await fetch(`${SCRIPT_URL}?nome=${encodeURIComponent(q)}`);
+                    const data = await res.json();
+                    if (data?.length > 0) {
+                        const groups = data.reduce((acc, cur) => {
+                            (acc[cur.nomeConvite] = acc[cur.nomeConvite] || []).push(cur);
                             return acc;
                         }, {});
-                        
-                        setGroupedResults(groups);
-                        
-                        if (Object.keys(groups).length === 1) {
+                        setGrouped(groups);
+                        if (Object.keys(groups).length === 1)
                             selectInvite(Object.keys(groups)[0], groups[Object.keys(groups)[0]]);
-                        }
                     } else {
                         setError('Nenhum convite encontrado. Tente apenas o primeiro nome ou verifique a grafia.');
                     }
-                } catch (err) {
-                    setError('Ocorreu um erro na busca. Tente novamente.');
-                } finally {
-                    setLoading(false);
-                }
+                } catch { setError('Ocorreu um erro na busca. Tente novamente.'); }
+                finally   { setLoading(false); }
             };
 
             const selectInvite = (name, guests) => {
-                const initialAttendance = {};
-                guests.forEach(g => initialAttendance[getUniqueKey(g)] = g.situacao === "Confirmado");
-                setAttendance(initialAttendance);
-                setSelectedInvite({ name, guests });
+                const init = {};
+                guests.forEach(g => init[getKey(g)] = g.situacao === "Confirmado");
+                setAttendance(init);
+                setInvite({ name, guests });
             };
 
-            const toggleAttendance = (guest) => {
-                const key = getUniqueKey(guest);
-                setAttendance(prev => ({ ...prev, [key]: !prev[key] }));
-            };
+            const toggleAttendance = (g) =>
+                setAttendance(prev => ({ ...prev, [getKey(g)]: !prev[getKey(g)] }));
 
             const submitRSVP = async () => {
-                setIsSubmitting(true);
+                setSubmitting(true);
                 const payload = selectedInvite.guests.map(g => ({
-                    rowId: g.rowId,
-                    nomeIndividual: g.nomeIndividual,
-                    presente: !!attendance[getUniqueKey(g)]
+                    rowId: g.rowId, nomeIndividual: g.nomeIndividual, presente: !!attendance[getKey(g)]
                 }));
                 try {
                     await fetch(SCRIPT_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
                     setFinished(true);
-                } catch (err) {
-                    setError('Erro ao salvar sua confirmação.');
-                } finally {
-                    setIsSubmitting(false);
-                }
+                } catch { setError('Erro ao salvar sua confirmação.'); }
+                finally   { setSubmitting(false); }
             };
+
+            const pad = (n) => String(n).padStart(2, '0');
 
             return (
                 <div className="min-h-screen">
-                    {/* Navigation */}
-                    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-rose-50 px-6 py-4 shadow-sm">
-                        <nav className="max-w-6xl mx-auto flex flex-wrap justify-center gap-6 md:gap-10 text-[11px] md:text-xs uppercase tracking-[0.2em] font-medium text-slate-500">
-                            <a href="#home" className="hover:text-rose-400 transition-colors">Home</a>
-                            <a href="#cerimonia" className="hover:text-rose-400 transition-colors">Cerimônia</a>
-                            <a href="#presentes" className="hover:text-rose-400 transition-colors">Presentes</a>
-                            <a href="#rsvp" className="hover:text-rose-400 transition-colors">RSVP</a>
+
+                    {/* ── NAV ── */}
+                    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-rose-50/80 px-6 py-4 shadow-sm">
+                        <nav className="max-w-6xl mx-auto flex flex-wrap justify-center gap-7 md:gap-12 text-[10px] md:text-xs uppercase tracking-[0.22em] font-semibold text-slate-400">
+                            {[['Home','home'],['Cerimônia','cerimonia'],['Presentes','presentes'],['RSVP','rsvp']].map(([label, id]) => (
+                                <a key={id} href={`#${id}`} className="nav-link hover:text-rose-400 transition-colors duration-300">{label}</a>
+                            ))}
                         </nav>
                     </header>
 
-                    {/* Home Section */}
-                    <section id="home" className="pt-16 pb-20 px-4 md:px-6 flex flex-col items-center text-center max-w-7xl mx-auto">
-                        <h1 className="text-7xl md:text-9xl font-dancing mb-6 text-slate-900 drop-shadow-sm animate-fade-in">
+                    {/* ── HERO ── */}
+                    <section id="home" className="relative pt-14 pb-20 px-4 md:px-8 flex flex-col items-center text-center max-w-7xl mx-auto overflow-hidden">
+                        <div className="orb w-80 h-80 bg-rose-100 -top-10 -left-24" style={{animationDelay:'0s'}} />
+                        <div className="orb w-60 h-60 bg-pink-100 top-20 -right-16"  style={{animationDelay:'3.5s'}} />
+
+                        <p className="anim-fade-up d1 relative text-[10px] md:text-xs uppercase tracking-[0.45em] text-rose-300 mb-3 font-semibold">
+                            02 · 05 · 2026
+                        </p>
+                        <h1 className="anim-fade-up d2 relative text-[14vw] sm:text-8xl md:text-[7rem] lg:text-9xl font-dancing text-slate-900 leading-none mb-3">
                             {COUPLE_NAMES}
                         </h1>
-                        <p className="text-slate-400 uppercase tracking-[0.4em] text-xs md:text-sm mb-12 animate-fade-in animation-delay-200">
+                        <span className="anim-fade-up d3 line-divider my-5" />
+                        <p className="anim-fade-up d4 text-slate-400 uppercase tracking-[0.38em] text-[9px] md:text-xs mb-10">
                             Bem-vindos ao nosso grande dia
                         </p>
 
-                        {/* Photo Grid - Masonry Style */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full animate-fade-in">
-                            {COUPLE_PHOTOS.map((photo, index) => (
-                                <div key={index} className={`relative overflow-hidden rounded-2xl md:rounded-[2rem] group cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 ${index === 0 ? 'md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto' : 'aspect-square'}`}>
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10" />
-                                    <img 
-                                        src={photo} 
-                                        alt={`Foto Casal ${index + 1}`} 
-                                        className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
-                                    />
+                        {/* Photo grid */}
+                        <div className="photo-grid w-full anim-fade-up d5">
+                            {COUPLE_PHOTOS.map((photo, i) => (
+                                <div key={i} className={`photo-item-${i}`}>
+                                    <img src={photo} alt={`Foto ${i+1}`} loading={i < 2 ? 'eager' : 'lazy'} />
                                 </div>
                             ))}
                         </div>
                     </section>
 
-                    {/* Ceremony Section (NOVA SESSÃO) */}
-                    <section id="cerimonia" className="bg-rose-50/30 py-24 px-6 border-t border-rose-50">
+                    {/* ── CEREMONY ── */}
+                    <section id="cerimonia" className="relative bg-rose-50/40 py-20 md:py-28 px-5 md:px-8 border-t border-rose-100/50 overflow-hidden">
+                        <div className="orb w-96 h-96 bg-rose-100 -top-24 -right-24 opacity-20" style={{animationDelay:'2s'}} />
+
                         <div className="max-w-6xl mx-auto">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-                                {/* Left Content: Info */}
-                                <div className="text-center lg:text-left space-y-8 animate-fade-in">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+
+                                {/* Info column */}
+                                <div className="text-center lg:text-left space-y-8 relative">
                                     <div>
-                                        <h2 className="text-4xl md:text-5xl font-playfair mb-2 text-slate-900">A Cerimônia</h2>
-                                        <div className="h-1 w-20 bg-rose-200 mx-auto lg:mx-0 rounded-full"></div>
+                                        <p className="text-[10px] uppercase tracking-[0.35em] text-rose-300 font-semibold mb-3">Salve na agenda</p>
+                                        <h2 className="text-4xl md:text-5xl font-playfair text-slate-900 mb-3">A Cerimônia</h2>
+                                        <div className="h-px w-14 bg-gradient-to-r from-rose-300 to-transparent mx-auto lg:mx-0 rounded-full" />
                                     </div>
-                                    
-                                    <div className="space-y-2">
-                                        <p className="text-3xl md:text-4xl font-playfair text-slate-700">02 de Maio de 2026</p>
-                                        <p className="text-xl text-slate-500 font-light">às 16:30 horas</p>
+
+                                    <div>
+                                        <p className="text-2xl md:text-4xl font-playfair text-slate-700">02 de Maio de 2026</p>
+                                        <p className="text-base md:text-lg text-slate-400 font-light mt-1 tracking-wide">às 16:30 horas</p>
                                     </div>
 
                                     {/* Countdown */}
-                                    <div className="flex justify-center lg:justify-start gap-4 md:gap-6">
-                                        {[
-                                            { label: 'Dias', value: timeLeft.days },
-                                            { label: 'Horas', value: timeLeft.hours },
-                                            { label: 'Min', value: timeLeft.minutes },
-                                            { label: 'Seg', value: timeLeft.seconds }
-                                        ].map((item) => (
-                                            <div key={item.label} className="bg-white p-4 rounded-2xl shadow-sm border border-rose-50 w-20 md:w-24">
-                                                <span className="block text-2xl md:text-3xl font-bold text-rose-400 font-playfair">{item.value}</span>
-                                                <span className="text-[10px] uppercase tracking-wider text-slate-400">{item.label}</span>
+                                    <div className="flex justify-center lg:justify-start gap-3 md:gap-4">
+                                        {[['Dias',timeLeft.days],['Horas',timeLeft.hours],['Min',timeLeft.minutes],['Seg',timeLeft.seconds]].map(([label,val]) => (
+                                            <div key={label} className="countdown-box bg-white rounded-2xl shadow-sm border border-rose-100/80 w-16 md:w-20 py-3 text-center">
+                                                <span className="block text-xl md:text-3xl font-bold text-rose-400 font-playfair tabular-nums">{pad(val)}</span>
+                                                <span className="text-[9px] uppercase tracking-widest text-slate-400">{label}</span>
                                             </div>
                                         ))}
                                     </div>
 
                                     {/* Location */}
-                                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-rose-50 relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-20 h-20 bg-rose-100 rounded-bl-[100px] opacity-20 transition-transform group-hover:scale-150 duration-700"></div>
-                                        <h3 className="text-xl font-bold uppercase tracking-widest mb-3 text-slate-800">Espaço Belluno</h3>
-                                        <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+                                    <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-rose-50 relative overflow-hidden group">
+                                        <div className="absolute -top-8 -right-8 w-28 h-28 bg-rose-100 rounded-full opacity-20 group-hover:opacity-35 group-hover:scale-150 transition-all duration-700" />
+                                        <h3 className="text-sm font-bold uppercase tracking-[0.2em] mb-2 text-slate-800">Espaço Belluno</h3>
+                                        <p className="text-slate-500 text-sm leading-relaxed mb-5">
                                             Av. Dr. Joaquim Craveiro de Sá, quadra B1 lote 12<br/>
-                                            Expansul, Aparecida de Goiânia - GO<br/>
+                                            Expansul, Aparecida de Goiânia — GO<br/>
                                             CEP: 74986-320
                                         </p>
-                                        <a 
-                                            href="https://maps.app.goo.gl/xVw6fqBjbb7mFrNu9" 
-                                            target="_blank"
-                                            className="inline-flex items-center gap-2 text-rose-400 text-xs font-bold uppercase tracking-widest hover:text-rose-500 transition-colors border-b border-rose-200 pb-1"
-                                        >
-                                            Ver no Mapa <span>→</span>
+                                        <a href="https://maps.app.goo.gl/xVw6fqBjbb7mFrNu9" target="_blank"
+                                           className="inline-flex items-center gap-2 text-rose-400 text-[10px] font-bold uppercase tracking-widest hover:text-rose-500 transition-colors">
+                                            Ver no Mapa <span className="text-sm">→</span>
                                         </a>
                                     </div>
                                 </div>
 
-                                {/* Right Content: Venue Photos */}
-                                <div className="grid grid-cols-2 gap-4 animate-fade-in">
+                                {/* Venue photos — stagger only on desktop to avoid mobile clipping */}
+                                <div className="grid grid-cols-2 gap-3 md:gap-5">
                                     {VENUE_PHOTOS.map((img, idx) => (
-                                        <div key={idx} className={`rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-500 ${idx % 2 === 0 ? 'translate-y-8' : ''}`}>
-                                            <img src={img} alt="Espaço Belluno" className="w-full h-48 md:h-64 object-cover hover:scale-110 transition-transform duration-700" />
+                                        <div key={idx}
+                                             className={`rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-shadow duration-500 ${idx % 2 === 0 ? 'md:mt-6' : 'md:-mt-6'}`}
+                                             style={{aspectRatio:'4/3'}}>
+                                            <img src={img} alt="Espaço Belluno"
+                                                 className="w-full h-full object-cover hover:scale-110 transition-transform duration-700"
+                                                 loading="lazy" />
                                         </div>
                                     ))}
                                 </div>
@@ -477,112 +366,111 @@
                         </div>
                     </section>
 
-                    {/* RSVP Section */}
-                    <section id="rsvp" className="bg-slate-50 py-24 px-6">
+                    {/* ── RSVP ── */}
+                    <section id="rsvp" className="bg-slate-50 py-20 md:py-28 px-5 md:px-6">
                         <div className="max-w-xl mx-auto bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden min-h-[400px] flex flex-col">
-                            <div className="absolute top-0 left-0 w-2 h-full bg-rose-200" />
+                            <div className="absolute top-0 left-0 w-1.5 h-full bg-gradient-to-b from-rose-200 via-rose-300 to-rose-100" />
                             <div className="text-center mb-10">
-                                <h2 className="text-3xl font-playfair mb-2">Confirmar Presença</h2>
+                                <p className="text-[10px] uppercase tracking-[0.35em] text-rose-300 font-semibold mb-2">Você está na lista?</p>
+                                <h2 className="text-3xl font-playfair mb-1">Confirmar Presença</h2>
                                 <p className="text-slate-400 text-xs italic">Busca inteligente por nome.</p>
                             </div>
 
                             {finished ? (
-                                <div className="text-center py-10 animate-fade-in flex-grow flex flex-col justify-center">
-                                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
+                                <div className="text-center py-10 anim-fade-in flex-grow flex flex-col justify-center">
+                                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6 ring-4 ring-green-100">
                                         <span className="text-green-500 text-2xl">✓</span>
                                     </div>
                                     <h3 className="text-2xl font-playfair text-slate-800 mb-2">Presença Confirmada!</h3>
                                     <p className="text-slate-500">Obrigado por responder.</p>
-                                    <button onClick={() => { setFinished(false); setGroupedResults(null); setSelectedInvite(null); setSearchName(''); }} className="mt-8 text-rose-300 font-bold uppercase text-[10px] tracking-widest border-b border-rose-100 inline-block mx-auto">Confirmar outro</button>
+                                    <button onClick={() => { setFinished(false); setGrouped(null); setInvite(null); setSearchName(''); }}
+                                            className="mt-8 text-rose-300 font-bold uppercase text-[10px] tracking-widest border-b border-rose-100 inline-block mx-auto">
+                                        Confirmar outro
+                                    </button>
                                 </div>
                             ) : !groupedResults ? (
-                                <div className="space-y-4 animate-fade-in">
-                                    <input 
-                                        type="text" 
-                                        value={searchName}
-                                        onChange={(e) => setSearchName(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleRSVPSearch()}
-                                        placeholder="Ex: Leticia" 
-                                        className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-rose-100 transition-all border border-transparent focus:border-rose-200"
-                                    />
+                                <div className="space-y-4 anim-fade-in">
+                                    <input type="text" value={searchName}
+                                           onChange={e => setSearchName(e.target.value)}
+                                           onKeyPress={e => e.key === 'Enter' && handleSearch()}
+                                           placeholder="Ex: Leticia"
+                                           className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-rose-100 transition-all border border-transparent focus:border-rose-200 text-slate-800" />
                                     {error && <p className="text-rose-500 text-[10px] text-center uppercase tracking-wider">{error}</p>}
-                                    <button onClick={handleRSVPSearch} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-black transition-all disabled:opacity-50" disabled={loading}>
+                                    <button onClick={handleSearch} disabled={loading}
+                                            className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-black transition-all disabled:opacity-50">
                                         {loading ? "Buscando..." : "Buscar Convite"}
                                     </button>
                                 </div>
                             ) : !selectedInvite ? (
-                                <div className="animate-fade-in space-y-4">
+                                <div className="anim-fade-in space-y-4">
                                     <p className="text-center text-slate-500 text-sm mb-6">Escolha o seu convite:</p>
-                                    {Object.keys(groupedResults).map((name) => (
-                                        <button 
-                                            key={name}
-                                            onClick={() => selectInvite(name, groupedResults[name])}
-                                            className="w-full p-5 bg-white border border-slate-100 rounded-2xl text-left hover:border-rose-200 hover:shadow-md transition-all flex justify-between items-center group"
-                                        >
+                                    {Object.keys(groupedResults).map(name => (
+                                        <button key={name} onClick={() => selectInvite(name, groupedResults[name])}
+                                                className="w-full p-5 bg-white border border-slate-100 rounded-2xl text-left hover:border-rose-200 hover:shadow-md transition-all flex justify-between items-center group">
                                             <span className="font-playfair text-lg text-slate-800 group-hover:text-rose-400">{name}</span>
                                             <span className="text-slate-300 group-hover:translate-x-1 transition-transform">→</span>
                                         </button>
                                     ))}
-                                    <button onClick={() => setGroupedResults(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Voltar</button>
+                                    <button onClick={() => setGrouped(null)}
+                                            className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">
+                                        Voltar
+                                    </button>
                                 </div>
                             ) : (
-                                <div className="animate-fade-in">
+                                <div className="anim-fade-in">
                                     <div className="mb-8 p-6 bg-rose-50/50 rounded-3xl border border-rose-100 text-center">
                                         <span className="text-[10px] text-rose-300 uppercase tracking-[0.2em] font-bold">Convite selecionado</span>
                                         <h4 className="text-2xl font-playfair text-slate-800 mt-2">{selectedInvite.name}</h4>
                                     </div>
                                     <div className="space-y-3 mb-8">
-                                        {selectedInvite.guests.map((g) => {
-                                            const uKey = getUniqueKey(g);
-                                            const isSelected = !!attendance[uKey];
+                                        {selectedInvite.guests.map(g => {
+                                            const uKey = getKey(g);
+                                            const isSel = !!attendance[uKey];
                                             return (
-                                                <div 
-                                                    key={uKey} 
-                                                    onClick={() => toggleAttendance(g)} 
-                                                    className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${isSelected ? 'bg-white border-rose-300 shadow-md transform scale-[1.02]' : 'bg-slate-50 border-transparent opacity-70 hover:opacity-100'}`}
-                                                >
-                                                    <span className={`font-medium transition-colors ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>{g.nomeIndividual}</span>
-                                                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-rose-400 border-rose-400' : 'border-slate-300 bg-transparent'}`}>
-                                                        {isSelected && <span className="text-white text-sm font-bold">✓</span>}
+                                                <div key={uKey} onClick={() => toggleAttendance(g)}
+                                                     className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${isSel ? 'bg-white border-rose-300 shadow-md scale-[1.02]' : 'bg-slate-50 border-transparent opacity-70 hover:opacity-100'}`}>
+                                                    <span className={`font-medium transition-colors ${isSel ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>{g.nomeIndividual}</span>
+                                                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSel ? 'bg-rose-400 border-rose-400' : 'border-slate-300'}`}>
+                                                        {isSel && <span className="text-white text-sm font-bold">✓</span>}
                                                     </div>
                                                 </div>
                                             );
                                         })}
                                     </div>
-                                    <button 
-                                        onClick={submitRSVP} 
-                                        disabled={isSubmitting}
-                                        className="w-full bg-rose-400 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-rose-500 shadow-lg shadow-rose-100 disabled:opacity-50 transition-all"
-                                    >
+                                    <button onClick={submitRSVP} disabled={isSubmitting}
+                                            className="w-full bg-rose-400 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-rose-500 shadow-lg shadow-rose-100 disabled:opacity-50 transition-all">
                                         {isSubmitting ? "Enviando..." : "Confirmar Presença"}
                                     </button>
-                                    <button onClick={() => setSelectedInvite(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Trocar convite</button>
+                                    <button onClick={() => setInvite(null)}
+                                            className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">
+                                        Trocar convite
+                                    </button>
                                 </div>
                             )}
                         </div>
                     </section>
 
-                    {/* Gifts Section */}
-                    <section id="presentes" className="py-24 px-6 max-w-6xl mx-auto">
-                        <div className="text-center mb-16">
-                            <h2 className="text-4xl font-playfair mb-4">Lista de Presentes</h2>
+                    {/* ── GIFTS ── */}
+                    <section id="presentes" className="py-20 md:py-28 px-5 md:px-6 max-w-6xl mx-auto">
+                        <div className="text-center mb-14">
+                            <p className="text-[10px] uppercase tracking-[0.35em] text-rose-300 font-semibold mb-3">Com carinho</p>
+                            <h2 className="text-4xl font-playfair mb-3">Lista de Presentes</h2>
+                            <span className="line-divider mb-4" />
                             <p className="text-slate-400 text-sm max-w-lg mx-auto italic">Contribua para nossa nova etapa de vida.</p>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                             {GIFTS_DATA.map(gift => (
                                 <div key={gift.id} className="bg-white group rounded-[2.5rem] p-4 border border-slate-50 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col">
-                                    <div className="w-full aspect-square rounded-[2rem] overflow-hidden mb-6 relative">
-                                        <img src={gift.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={gift.title} />
+                                    <div className="w-full aspect-square rounded-[2rem] overflow-hidden mb-6">
+                                        <img src={gift.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={gift.title} loading="lazy" />
                                     </div>
                                     <div className="px-2 flex-grow flex flex-col">
                                         <h3 className="text-xl font-playfair text-slate-800 mb-2">{gift.title}</h3>
                                         <p className="text-slate-400 text-[11px] mb-4 line-clamp-2">{gift.desc}</p>
                                         <div className="mt-auto flex justify-between items-center pt-4 border-t border-slate-50">
                                             <p className="text-lg font-bold text-slate-900">R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                            <button 
-                                                onClick={() => setSelectedGift(gift)}
-                                                className="bg-slate-900 text-white px-5 py-3 rounded-xl text-[9px] uppercase tracking-widest font-bold hover:bg-black transition-all"
-                                            >
+                                            <button onClick={() => setSelectedGift(gift)}
+                                                    className="bg-slate-900 text-white px-5 py-3 rounded-xl text-[9px] uppercase tracking-widest font-bold hover:bg-black transition-all">
                                                 Presentear
                                             </button>
                                         </div>
@@ -592,60 +480,45 @@
                         </div>
                     </section>
 
-                    {/* MODAL DE PAGAMENTO */}
+                    {/* ── PAYMENT MODAL ── */}
                     {selectedGift && (
                         <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
-                            {/* Backdrop */}
-                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setSelectedGift(null)}></div>
-                            
-                            {/* Modal Card */}
-                            <div className="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-md relative z-10 shadow-2xl animate-fade-in flex flex-col items-center text-center">
+                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setSelectedGift(null)} />
+                            <div className="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-md relative z-10 shadow-2xl anim-fade-in flex flex-col items-center text-center">
                                 <button onClick={() => setSelectedGift(null)} className="absolute top-5 right-6 text-slate-300 hover:text-slate-600 transition-colors text-xl font-bold">✕</button>
-                                
-                                <div className="w-32 h-32 rounded-full overflow-hidden mb-5 border-4 border-rose-100 shadow-inner">
+                                <div className="w-28 h-28 rounded-full overflow-hidden mb-5 border-4 border-rose-100">
                                     <img src={selectedGift.image} className="w-full h-full object-cover" alt={selectedGift.title} />
                                 </div>
-                                
                                 <h3 className="text-2xl font-playfair text-slate-900 mb-2">{selectedGift.title}</h3>
                                 <p className="text-slate-500 text-sm mb-4 leading-relaxed px-4">{selectedGift.desc}</p>
                                 <p className="text-3xl font-bold text-rose-500 mb-8 font-playfair">R$ {selectedGift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                
                                 <div className="flex flex-col gap-3 w-full">
-                                    {/* Botão PIX (Nubank style) */}
-                                    <a 
-                                        href={selectedGift.linkpix} 
-                                        target="_blank" 
-                                        className="w-full bg-[#820ad1] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#6d06b0] shadow-lg shadow-purple-200 hover:shadow-xl transition-all flex items-center justify-center gap-3 transform hover:-translate-y-1"
-                                    >
-                                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.01 21.05l-7.4-4.2a1.6 1.6 0 010-2.8l7.4-4.2 7.39 4.2a1.6 1.6 0 010 2.8l-7.4 4.2zm-9.01-6.1l8.1 4.6a1.8 1.8 0 001.8 0l8.1-4.6a1.8 1.8 0 000-3.13l-8.1-4.6a1.8 1.8 0 00-1.8 0l-8.1 4.6a1.8 1.8 0 000 3.14zM12 2.95l7.4 4.2-2.5 1.43-4.9-2.8-4.9 2.8-2.5-1.43 7.4-4.2z"/></svg>
-                                       Pagar com Pix
+                                    <a href={selectedGift.linkpix} target="_blank"
+                                       className="w-full bg-[#820ad1] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#6d06b0] shadow-lg shadow-purple-100 hover:shadow-xl transition-all flex items-center justify-center gap-3 hover:-translate-y-1">
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.01 21.05l-7.4-4.2a1.6 1.6 0 010-2.8l7.4-4.2 7.39 4.2a1.6 1.6 0 010 2.8l-7.4 4.2zm-9.01-6.1l8.1 4.6a1.8 1.8 0 001.8 0l8.1-4.6a1.8 1.8 0 000-3.13l-8.1-4.6a1.8 1.8 0 00-1.8 0l-8.1 4.6a1.8 1.8 0 000 3.14zM12 2.95l7.4 4.2-2.5 1.43-4.9-2.8-4.9 2.8-2.5-1.43 7.4-4.2z"/></svg>
+                                        Pagar com Pix
                                     </a>
-                                    
-                                    {/* Botão Cartão (Mercado Pago style) */}
-                                    <a 
-                                        href={selectedGift.linkcartao} 
-                                        target="_blank" 
-                                        className="w-full bg-[#009ee3] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#007eb5] shadow-lg shadow-sky-200 hover:shadow-xl transition-all flex items-center justify-center gap-3 transform hover:-translate-y-1"
-                                    >
-                                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                                       Pagar com Cartão
+                                    <a href={selectedGift.linkcartao} target="_blank"
+                                       className="w-full bg-[#009ee3] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#007eb5] shadow-lg shadow-sky-100 hover:shadow-xl transition-all flex items-center justify-center gap-3 hover:-translate-y-1">
+                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                                        Pagar com Cartão
                                     </a>
                                 </div>
-                                
                                 <p className="mt-6 text-[10px] text-slate-300 uppercase tracking-wider">Seguro e rápido</p>
                             </div>
                         </div>
                     )}
 
-                    <footer className="py-12 text-center text-slate-400 text-[10px] tracking-[0.3em] uppercase border-t border-slate-100">
-                        <p>Com carinho, {COUPLE_NAMES}</p>
+                    {/* ── FOOTER ── */}
+                    <footer className="py-12 text-center border-t border-slate-100">
+                        <p className="font-dancing text-3xl text-slate-400 mb-1">{COUPLE_NAMES}</p>
+                        <p className="text-[9px] uppercase tracking-[0.45em] text-slate-300 mt-1">02 · 05 · 2026</p>
                     </footer>
                 </div>
             );
         };
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
