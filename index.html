@@ -295,15 +295,15 @@
 
                     {/* RSVP Section */}
                     <section id="rsvp" className="bg-gradient-to-b from-white to-emerald-50/40 py-24 px-6 relative">
-                        <div className="max-w-lg mx-auto bg-white p-8 md:p-12 rounded-[3rem] shadow-[0_20px_60px_rgb(0,0,0,0.05)] border border-slate-50 relative overflow-hidden min-h-[420px] flex flex-col">
+                        <div className="max-w-lg mx-auto bg-white p-8 md:p-12 rounded-[3rem] shadow-[0_20px_60px_rgb(0,0,0,0.05)] border border-slate-50 relative overflow-hidden flex flex-col">
                             <div className="absolute top-0 inset-x-0 h-2 bg-emerald-700" />
-                            <div className="text-center mb-10 mt-2">
+                            <div className="text-center mb-8 mt-2">
                                 <h2 className="text-3xl md:text-4xl font-playfair mb-3 text-slate-900">Confirmar Presença</h2>
                                 <p className="text-slate-400 text-xs font-light">Use o nome recebido no convite para a busca.</p>
                             </div>
 
                             {finished ? (
-                                <div className="text-center py-8 animate-fade-in flex-grow flex flex-col justify-center">
+                                <div className="text-center py-4 animate-fade-in flex flex-col justify-center">
                                     <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
                                         <span className="text-emerald-500 text-3xl">✓</span>
                                     </div>
@@ -312,7 +312,7 @@
                                     <button onClick={() => { setFinished(false); setGroupedResults(null); setSelectedInvite(null); setSearchName(''); }} className="text-emerald-700 font-bold uppercase text-[10px] tracking-[0.2em] border-b border-emerald-200 inline-block mx-auto hover:text-emerald-900 transition-colors pb-1">Confirmar outro convite</button>
                                 </div>
                             ) : !groupedResults ? (
-                                <div className="space-y-5 animate-fade-in flex-grow flex flex-col justify-center">
+                                <div className="space-y-5 animate-fade-in flex flex-col">
                                     <div>
                                         <input 
                                             type="text" 
@@ -329,9 +329,9 @@
                                     </button>
                                 </div>
                             ) : !selectedInvite ? (
-                                <div className="animate-fade-in space-y-4 flex-grow flex flex-col">
+                                <div className="animate-fade-in space-y-4 flex flex-col">
                                     <p className="text-center text-slate-500 text-sm mb-4 font-light">Encontramos algumas opções. Qual é o seu?</p>
-                                    <div className="space-y-3 flex-grow overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
+                                    <div className="space-y-3 overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
                                         {Object.keys(groupedResults).map((name) => (
                                             <button 
                                                 key={name}
@@ -346,12 +346,12 @@
                                     <button onClick={() => setGroupedResults(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-[0.2em] mt-6 hover:text-slate-700 transition-colors font-semibold">← Voltar à busca</button>
                                 </div>
                             ) : (
-                                <div className="animate-fade-in flex-grow flex flex-col">
+                                <div className="animate-fade-in flex flex-col">
                                     <div className="mb-6 p-5 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 text-center">
                                         <span className="text-[9px] text-emerald-600 uppercase tracking-[0.2em] font-bold block mb-1">Convite selecionado</span>
                                         <h4 className="text-xl font-playfair text-slate-800">{selectedInvite.name}</h4>
                                     </div>
-                                    <div className="space-y-3 mb-8 flex-grow overflow-y-auto max-h-[200px] pr-2 custom-scrollbar">
+                                    <div className="space-y-3 mb-8 overflow-y-auto max-h-[200px] pr-2 custom-scrollbar">
                                         {selectedInvite.guests.map((g) => {
                                             const uKey = getUniqueKey(g);
                                             const isSelected = !!attendance[uKey];
