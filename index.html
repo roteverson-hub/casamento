@@ -181,11 +181,12 @@
                             <a href="#cerimonia" className="hover:text-emerald-700 transition-colors">Cerimônia</a>
                             <a href="#presentes" className="hover:text-emerald-700 transition-colors">Presentes</a>
                             <a href="#rsvp" className="hover:text-emerald-700 transition-colors">RSVP</a>
+                            <a href="#historia" className="hover:text-emerald-700 transition-colors">Nossa História</a>
                         </nav>
                     </header>
 
                     {/* Home Section */}
-                    <section id="home" className="relative pt-32 pb-20 px-4 md:px-6 flex flex-col items-center text-center w-full min-h-[90vh]">
+                    <section id="home" className="relative pt-32 pb-20 px-4 md:px-6 flex flex-col items-center justify-center text-center w-full min-h-[90vh]">
                         {/* Imagem de Fundo Aquarela */}
                         <div className="absolute inset-x-0 top-0 w-full h-[70vh] md:h-[90vh] z-0 pointer-events-none" style={{
                             backgroundImage: 'url("https://i.postimg.cc/QtfdWz2V/capa-site.jpg")',
@@ -205,20 +206,6 @@
                             <p className="text-emerald-800 uppercase tracking-[0.4em] text-xs md:text-sm mb-16 animate-fade-in font-medium">
                                 Bem-vindos ao nosso grande dia
                             </p>
-
-                            {/* Photo Grid - Masonry Style */}
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 w-full animate-fade-in">
-                                {COUPLE_PHOTOS.map((photo, index) => (
-                                    <div key={index} className={`relative overflow-hidden rounded-2xl md:rounded-[2rem] group cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 ${index === 0 ? 'md:col-span-2 md:row-span-2 aspect-[4/3] md:aspect-auto' : 'aspect-square'}`}>
-                                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10" />
-                                        <img 
-                                            src={photo} 
-                                            alt={`Foto Casal ${index + 1}`} 
-                                            className="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-700" 
-                                        />
-                                    </div>
-                                ))}
-                            </div>
                         </div>
                     </section>
 
@@ -443,6 +430,31 @@
                             </div>
                         </div>
                     )}
+
+                    {/* Nossa História & Fotos Section */}
+                    <section id="historia" className="py-24 px-6 max-w-7xl mx-auto w-full border-t border-emerald-50">
+                        <div className="text-center mb-16 max-w-3xl mx-auto animate-fade-in">
+                            <h2 className="text-4xl md:text-5xl font-playfair mb-8 text-slate-900">Nossa História</h2>
+                            <p className="text-slate-600 text-sm md:text-base leading-relaxed md:leading-loose font-light italic">
+                                "O que começou com horas de conversas ininterruptas se transformou em uma vida inteira de parceria. Passamos pelo namoro, pelo amadurecimento e agora chegamos ao altar! Estamos muito felizes em ter vocês conosco para celebrar o nosso matrimônio e o amor que começou lá atrás, nos corredores da escola."
+                            </p>
+                            <div className="h-1 w-20 bg-emerald-200 mx-auto mt-10 rounded-full"></div>
+                        </div>
+
+                        {/* Photo Grid - True Masonry (Sem cortes) */}
+                        <div className="columns-1 sm:columns-2 md:columns-3 gap-4 md:gap-6 w-full animate-fade-in">
+                            {COUPLE_PHOTOS.map((photo, index) => (
+                                <div key={index} className="relative overflow-hidden rounded-2xl group cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 break-inside-avoid mb-4 md:mb-6">
+                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10" />
+                                    <img 
+                                        src={photo} 
+                                        alt={`Foto Casal ${index + 1}`} 
+                                        className="w-full h-auto transform group-hover:scale-105 transition-transform duration-700" 
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                    </section>
 
                     <footer className="py-12 text-center text-slate-400 text-[10px] tracking-[0.3em] uppercase border-t border-slate-100">
                         <p>Com carinho, {COUPLE_NAMES}</p>
