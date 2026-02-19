@@ -23,18 +23,27 @@
         .font-amsterdam { font-family: 'Amsterdam Four', 'Dancing Script', cursive; }
         .font-dancing { font-family: 'Dancing Script', cursive; }
         .font-playfair { font-family: 'Playfair Display', serif; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        
+        @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
+        .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
+
         .scroll-smooth { scroll-behavior: smooth; }
         
         /* Custom Scrollbar */
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #fff; }
-        ::-webkit-scrollbar-thumb { background: #a7f3d0; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #047857; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #fafafa; }
+        ::-webkit-scrollbar-thumb { background: #a7f3d0; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #059669; }
+
+        /* Esconder scrollbar no mobile nav se precisar rolar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
 </head>
-<body class="bg-white text-slate-800 antialiased selection:bg-emerald-100 scroll-smooth">
+<body class="bg-[#fafafa] text-slate-800 antialiased selection:bg-emerald-100 selection:text-emerald-900 scroll-smooth">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -171,22 +180,28 @@
             };
 
             return (
-                <div className="min-h-screen">
-                    {/* Navigation */}
-                    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-md border-b border-emerald-50 px-6 py-4 shadow-sm">
-                        <nav className="max-w-6xl mx-auto flex flex-wrap justify-center gap-6 md:gap-10 text-[11px] md:text-xs uppercase tracking-[0.2em] font-medium text-slate-500">
-                            <a href="#home" className="hover:text-emerald-700 transition-colors">Home</a>
-                            <a href="#cerimonia" className="hover:text-emerald-700 transition-colors">Cerimônia</a>
-                            <a href="#presentes" className="hover:text-emerald-700 transition-colors">Presentes</a>
-                            <a href="#rsvp" className="hover:text-emerald-700 transition-colors">RSVP</a>
-                            <a href="#historia" className="hover:text-emerald-700 transition-colors">Nossa História</a>
+                <div className="min-h-screen bg-white">
+                    {/* Navigation - Estilo Flutuante Premium */}
+                    <header className="fixed top-4 md:top-6 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
+                        <nav className="pointer-events-auto bg-white/70 backdrop-blur-lg border border-white/50 shadow-[0_8px_30px_rgb(0,0,0,0.06)] rounded-full px-6 md:px-10 py-3 flex items-center overflow-x-auto hide-scrollbar max-w-full">
+                            <ul className="flex items-center gap-5 md:gap-10 text-[10px] md:text-[11px] uppercase tracking-[0.25em] font-semibold text-slate-500 whitespace-nowrap">
+                                <li><a href="#home" className="hover:text-emerald-700 transition-colors">Home</a></li>
+                                <li className="w-1 h-1 rounded-full bg-emerald-200/50"></li>
+                                <li><a href="#cerimonia" className="hover:text-emerald-700 transition-colors">Cerimônia</a></li>
+                                <li className="w-1 h-1 rounded-full bg-emerald-200/50"></li>
+                                <li><a href="#presentes" className="hover:text-emerald-700 transition-colors">Presentes</a></li>
+                                <li className="w-1 h-1 rounded-full bg-emerald-200/50"></li>
+                                <li><a href="#rsvp" className="hover:text-emerald-700 transition-colors">RSVP</a></li>
+                                <li className="w-1 h-1 rounded-full bg-emerald-200/50 hidden md:block"></li>
+                                <li><a href="#historia" className="hover:text-emerald-700 transition-colors hidden md:block">História</a></li>
+                            </ul>
                         </nav>
                     </header>
 
                     {/* Home Section */}
-                    <section id="home" className="relative pt-32 pb-20 px-4 md:px-6 flex flex-col items-center justify-center text-center w-full min-h-[90vh]">
+                    <section id="home" className="relative pt-32 pb-16 px-4 md:px-6 flex flex-col items-center justify-center text-center w-full min-h-[95vh] md:min-h-screen">
                         {/* Imagem de Fundo Aquarela */}
-                        <div className="absolute inset-x-0 top-0 w-full h-[70vh] md:h-[90vh] z-0 pointer-events-none" style={{
+                        <div className="absolute inset-x-0 top-0 w-full h-[75vh] md:h-[95vh] z-0 pointer-events-none" style={{
                             backgroundImage: 'url("https://i.postimg.cc/QtfdWz2V/capa-site.jpg")',
                             backgroundPosition: 'center top',
                             backgroundSize: 'cover',
@@ -197,52 +212,60 @@
                             maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)'
                         }}></div>
 
-                        <div className="relative z-10 max-w-7xl mx-auto w-full flex flex-col items-center mt-4">
-                            <h1 className="text-6xl sm:text-7xl md:text-9xl font-amsterdam mb-6 text-slate-900 drop-shadow-sm animate-fade-in leading-[1.3] md:leading-normal py-4">
+                        <div className="relative z-10 max-w-7xl mx-auto w-full flex flex-col items-center mt-auto md:mt-20">
+                            <h1 className="text-6xl sm:text-7xl md:text-[10rem] font-amsterdam mb-4 text-emerald-950 drop-shadow-sm animate-fade-in leading-[1.3] md:leading-tight py-4">
                                 {COUPLE_NAMES}
                             </h1>
-                            <p className="text-emerald-800 uppercase tracking-[0.4em] text-xs md:text-sm mb-16 animate-fade-in font-medium">
+                            <p className="text-emerald-800/80 uppercase tracking-[0.4em] text-xs md:text-sm font-medium animate-fade-in" style={{ animationDelay: '0.2s' }}>
                                 Bem-vindos ao nosso grande dia
                             </p>
                         </div>
+                        
+                        {/* Indicador de rolagem animado */}
+                        <div className="mt-auto pt-16 relative z-10 opacity-60 animate-bounce-subtle">
+                            <span className="text-xs uppercase tracking-[0.3em] text-emerald-700 mb-3 block">Rolar</span>
+                            <div className="w-px h-12 bg-gradient-to-b from-emerald-600 to-transparent mx-auto"></div>
+                        </div>
                     </section>
 
-                    {/* Ceremony Section (NOVA SESSÃO) */}
-                    <section id="cerimonia" className="bg-emerald-50/30 py-24 px-6 border-t border-emerald-50">
-                        <div className="max-w-6xl mx-auto">
-                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+                    {/* Ceremony Section */}
+                    <section id="cerimonia" className="bg-emerald-50/20 py-24 px-6 relative">
+                        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-emerald-100 to-transparent"></div>
+                        <div className="max-w-6xl mx-auto relative z-10">
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-24 items-center">
                                 {/* Left Content: Info */}
-                                <div className="text-center lg:text-left space-y-8 animate-fade-in">
+                                <div className="text-center lg:text-left space-y-10 animate-fade-in">
                                     <div>
-                                        <h2 className="text-4xl md:text-5xl font-playfair mb-2 text-slate-900">A Cerimônia</h2>
-                                        <div className="h-1 w-20 bg-emerald-700 mx-auto lg:mx-0 rounded-full"></div>
+                                        <span className="text-[10px] text-emerald-600 uppercase tracking-[0.3em] font-bold mb-3 block">Onde e Quando</span>
+                                        <h2 className="text-4xl md:text-6xl font-playfair mb-4 text-slate-900">A Cerimônia</h2>
+                                        <div className="h-px w-24 bg-emerald-200 mx-auto lg:mx-0"></div>
                                     </div>
                                     
-                                    <div className="space-y-2">
+                                    <div className="space-y-3">
                                         <p className="text-3xl md:text-4xl font-playfair text-slate-700">02 de Maio de 2026</p>
-                                        <p className="text-xl text-slate-500 font-light">às 16:30 horas</p>
+                                        <p className="text-lg md:text-xl text-slate-500 font-light tracking-wide">às 16:30 horas</p>
                                     </div>
 
                                     {/* Countdown */}
-                                    <div className="flex justify-center lg:justify-start gap-4 md:gap-6">
+                                    <div className="flex justify-center lg:justify-start gap-3 md:gap-5">
                                         {[
                                             { label: 'Dias', value: timeLeft.days },
                                             { label: 'Horas', value: timeLeft.hours },
                                             { label: 'Min', value: timeLeft.minutes },
                                             { label: 'Seg', value: timeLeft.seconds }
                                         ].map((item) => (
-                                            <div key={item.label} className="bg-white p-4 rounded-2xl shadow-sm border border-emerald-50 w-20 md:w-24">
-                                                <span className="block text-2xl md:text-3xl font-bold text-emerald-700 font-playfair">{item.value}</span>
-                                                <span className="text-[10px] uppercase tracking-wider text-slate-400">{item.label}</span>
+                                            <div key={item.label} className="bg-white/60 backdrop-blur-sm px-4 py-5 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.03)] border border-emerald-50 w-[72px] md:w-[88px] flex flex-col items-center justify-center">
+                                                <span className="block text-2xl md:text-3xl font-normal text-emerald-800 font-playfair mb-1">{item.value}</span>
+                                                <span className="text-[9px] uppercase tracking-[0.2em] text-slate-400 font-medium">{item.label}</span>
                                             </div>
                                         ))}
                                     </div>
 
                                     {/* Location */}
-                                    <div className="bg-white p-8 rounded-3xl shadow-sm border border-emerald-50 relative overflow-hidden group">
-                                        <div className="absolute top-0 right-0 w-20 h-20 bg-emerald-100 rounded-bl-[100px] opacity-20 transition-transform group-hover:scale-150 duration-700"></div>
-                                        <h3 className="text-xl font-bold uppercase tracking-widest mb-3 text-slate-800">Espaço Belluno</h3>
-                                        <p className="text-slate-500 mb-6 text-sm leading-relaxed">
+                                    <div className="bg-white p-8 md:p-10 rounded-[2rem] shadow-[0_10px_40px_rgb(0,0,0,0.04)] border border-emerald-50 relative overflow-hidden group hover:shadow-[0_10px_40px_rgb(0,0,0,0.08)] transition-all duration-500">
+                                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-emerald-50 rounded-full opacity-50 group-hover:scale-150 transition-transform duration-700"></div>
+                                        <h3 className="text-xl md:text-2xl font-playfair mb-4 text-slate-900 relative z-10">Espaço Belluno</h3>
+                                        <p className="text-slate-500 mb-8 text-sm md:text-base leading-relaxed font-light relative z-10">
                                             Av. Dr. Joaquim Craveiro de Sá, quadra B1 lote 12<br/>
                                             Expansul, Aparecida de Goiânia - GO<br/>
                                             CEP: 74986-320
@@ -250,9 +273,9 @@
                                         <a 
                                             href="https://maps.app.goo.gl/xVw6fqBjbb7mFrNu9" 
                                             target="_blank"
-                                            className="inline-flex items-center gap-2 text-emerald-700 text-xs font-bold uppercase tracking-widest hover:text-emerald-800 transition-colors border-b border-emerald-200 pb-1"
+                                            className="inline-flex items-center justify-center w-full md:w-auto bg-emerald-800 text-white px-8 py-4 rounded-full text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-900 transition-all hover:-translate-y-1 relative z-10 shadow-lg shadow-emerald-900/20"
                                         >
-                                            Ver no Mapa <span>→</span>
+                                            Ver no Mapa
                                         </a>
                                     </div>
                                 </div>
@@ -262,7 +285,7 @@
                                     <img 
                                         src={VENUE_PHOTOS[0]} 
                                         alt="Ilustração Espaço Belluno" 
-                                        className="w-full max-w-md lg:max-w-xl h-auto object-contain hover:scale-105 transition-transform duration-1000 opacity-95"
+                                        className="w-full max-w-md lg:max-w-[120%] h-auto object-contain hover:scale-[1.02] transition-transform duration-1000 opacity-95 lg:-ml-10"
                                         style={{ mixBlendMode: 'multiply' }}
                                     />
                                 </div>
@@ -271,60 +294,64 @@
                     </section>
 
                     {/* RSVP Section */}
-                    <section id="rsvp" className="bg-slate-50 py-24 px-6">
-                        <div className="max-w-xl mx-auto bg-white p-8 md:p-12 rounded-[2.5rem] shadow-2xl relative overflow-hidden min-h-[400px] flex flex-col">
-                            <div className="absolute top-0 left-0 w-2 h-full bg-emerald-700" />
-                            <div className="text-center mb-10">
-                                <h2 className="text-3xl font-playfair mb-2">Confirmar Presença</h2>
-                                <p className="text-slate-400 text-xs italic">Use o nome recebido no convite para a busca.</p>
+                    <section id="rsvp" className="bg-gradient-to-b from-white to-emerald-50/40 py-24 px-6 relative">
+                        <div className="max-w-lg mx-auto bg-white p-8 md:p-12 rounded-[3rem] shadow-[0_20px_60px_rgb(0,0,0,0.05)] border border-slate-50 relative overflow-hidden min-h-[420px] flex flex-col">
+                            <div className="absolute top-0 inset-x-0 h-2 bg-emerald-700" />
+                            <div className="text-center mb-10 mt-2">
+                                <h2 className="text-3xl md:text-4xl font-playfair mb-3 text-slate-900">Confirmar Presença</h2>
+                                <p className="text-slate-400 text-xs font-light">Use o nome recebido no convite para a busca.</p>
                             </div>
 
                             {finished ? (
-                                <div className="text-center py-10 animate-fade-in flex-grow flex flex-col justify-center">
-                                    <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <span className="text-green-500 text-2xl">✓</span>
+                                <div className="text-center py-8 animate-fade-in flex-grow flex flex-col justify-center">
+                                    <div className="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
+                                        <span className="text-emerald-500 text-3xl">✓</span>
                                     </div>
-                                    <h3 className="text-2xl font-playfair text-slate-800 mb-2">Presença Confirmada!</h3>
-                                    <p className="text-slate-500">Obrigado por responder.</p>
-                                    <button onClick={() => { setFinished(false); setGroupedResults(null); setSelectedInvite(null); setSearchName(''); }} className="mt-8 text-emerald-700 font-bold uppercase text-[10px] tracking-widest border-b border-emerald-200 inline-block mx-auto">Confirmar outro</button>
+                                    <h3 className="text-2xl font-playfair text-slate-800 mb-3">Presença Confirmada!</h3>
+                                    <p className="text-slate-500 text-sm font-light mb-8">Obrigado por responder. Estamos ansiosos para te ver!</p>
+                                    <button onClick={() => { setFinished(false); setGroupedResults(null); setSelectedInvite(null); setSearchName(''); }} className="text-emerald-700 font-bold uppercase text-[10px] tracking-[0.2em] border-b border-emerald-200 inline-block mx-auto hover:text-emerald-900 transition-colors pb-1">Confirmar outro convite</button>
                                 </div>
                             ) : !groupedResults ? (
-                                <div className="space-y-4 animate-fade-in">
-                                    <input 
-                                        type="text" 
-                                        value={searchName}
-                                        onChange={(e) => setSearchName(e.target.value)}
-                                        onKeyPress={(e) => e.key === 'Enter' && handleRSVPSearch()}
-                                        placeholder="Ex: Vitor e Família" 
-                                        className="w-full p-4 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-100 transition-all border border-transparent focus:border-emerald-200"
-                                    />
-                                    {error && <p className="text-red-500 text-[10px] text-center uppercase tracking-wider">{error}</p>}
-                                    <button onClick={handleRSVPSearch} className="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-black transition-all disabled:opacity-50" disabled={loading}>
+                                <div className="space-y-5 animate-fade-in flex-grow flex flex-col justify-center">
+                                    <div>
+                                        <input 
+                                            type="text" 
+                                            value={searchName}
+                                            onChange={(e) => setSearchName(e.target.value)}
+                                            onKeyPress={(e) => e.key === 'Enter' && handleRSVPSearch()}
+                                            placeholder="Ex: Vitor e Família" 
+                                            className="w-full p-5 bg-slate-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-200 transition-all border border-slate-100 focus:border-emerald-300 text-center text-sm"
+                                        />
+                                        {error && <p className="text-red-400 text-[10px] text-center uppercase tracking-wider mt-3 font-medium">{error}</p>}
+                                    </div>
+                                    <button onClick={handleRSVPSearch} className="w-full bg-emerald-800 text-white py-5 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-emerald-900 shadow-xl shadow-emerald-900/20 transition-all hover:-translate-y-0.5 disabled:opacity-50 disabled:hover:translate-y-0" disabled={loading}>
                                         {loading ? "Buscando..." : "Buscar Convite"}
                                     </button>
                                 </div>
                             ) : !selectedInvite ? (
-                                <div className="animate-fade-in space-y-4">
-                                    <p className="text-center text-slate-500 text-sm mb-6">Escolha o seu convite:</p>
-                                    {Object.keys(groupedResults).map((name) => (
-                                        <button 
-                                            key={name}
-                                            onClick={() => selectInvite(name, groupedResults[name])}
-                                            className="w-full p-5 bg-white border border-slate-100 rounded-2xl text-left hover:border-emerald-200 hover:shadow-md transition-all flex justify-between items-center group"
-                                        >
-                                            <span className="font-playfair text-lg text-slate-800 group-hover:text-emerald-700">{name}</span>
-                                            <span className="text-slate-300 group-hover:translate-x-1 transition-transform">→</span>
-                                        </button>
-                                    ))}
-                                    <button onClick={() => setGroupedResults(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Voltar</button>
+                                <div className="animate-fade-in space-y-4 flex-grow flex flex-col">
+                                    <p className="text-center text-slate-500 text-sm mb-4 font-light">Encontramos algumas opções. Qual é o seu?</p>
+                                    <div className="space-y-3 flex-grow overflow-y-auto max-h-[250px] pr-2 custom-scrollbar">
+                                        {Object.keys(groupedResults).map((name) => (
+                                            <button 
+                                                key={name}
+                                                onClick={() => selectInvite(name, groupedResults[name])}
+                                                className="w-full p-5 bg-white border border-slate-100 rounded-2xl text-left hover:border-emerald-300 hover:shadow-lg hover:shadow-emerald-50 transition-all flex justify-between items-center group"
+                                            >
+                                                <span className="font-playfair text-lg text-slate-700 group-hover:text-emerald-800">{name}</span>
+                                                <span className="text-emerald-300 group-hover:translate-x-1 transition-transform">→</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                    <button onClick={() => setGroupedResults(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-[0.2em] mt-6 hover:text-slate-700 transition-colors font-semibold">← Voltar à busca</button>
                                 </div>
                             ) : (
-                                <div className="animate-fade-in">
-                                    <div className="mb-8 p-6 bg-emerald-50/50 rounded-3xl border border-emerald-100 text-center">
-                                        <span className="text-[10px] text-emerald-700 uppercase tracking-[0.2em] font-bold">Convite selecionado</span>
-                                        <h4 className="text-2xl font-playfair text-slate-800 mt-2">{selectedInvite.name}</h4>
+                                <div className="animate-fade-in flex-grow flex flex-col">
+                                    <div className="mb-6 p-5 bg-emerald-50/50 rounded-2xl border border-emerald-100/50 text-center">
+                                        <span className="text-[9px] text-emerald-600 uppercase tracking-[0.2em] font-bold block mb-1">Convite selecionado</span>
+                                        <h4 className="text-xl font-playfair text-slate-800">{selectedInvite.name}</h4>
                                     </div>
-                                    <div className="space-y-3 mb-8">
+                                    <div className="space-y-3 mb-8 flex-grow overflow-y-auto max-h-[200px] pr-2 custom-scrollbar">
                                         {selectedInvite.guests.map((g) => {
                                             const uKey = getUniqueKey(g);
                                             const isSelected = !!attendance[uKey];
@@ -332,11 +359,11 @@
                                                 <div 
                                                     key={uKey} 
                                                     onClick={() => toggleAttendance(g)} 
-                                                    className={`flex items-center justify-between p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${isSelected ? 'bg-white border-emerald-700 shadow-md transform scale-[1.02]' : 'bg-slate-50 border-transparent opacity-70 hover:opacity-100'}`}
+                                                    className={`flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all duration-300 ${isSelected ? 'bg-white border-emerald-500 shadow-md shadow-emerald-100/50 transform scale-[1.02]' : 'bg-slate-50 border-transparent opacity-80 hover:opacity-100 hover:bg-slate-100'}`}
                                                 >
-                                                    <span className={`font-medium transition-colors ${isSelected ? 'text-slate-900 font-bold' : 'text-slate-500'}`}>{g.nomeIndividual}</span>
-                                                    <div className={`w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-emerald-700 border-emerald-700' : 'border-slate-300 bg-transparent'}`}>
-                                                        {isSelected && <span className="text-white text-sm font-bold">✓</span>}
+                                                    <span className={`font-medium text-sm transition-colors ${isSelected ? 'text-emerald-900 font-bold' : 'text-slate-500'}`}>{g.nomeIndividual}</span>
+                                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${isSelected ? 'bg-emerald-600 border-emerald-600' : 'border-slate-300 bg-transparent'}`}>
+                                                        {isSelected && <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>}
                                                     </div>
                                                 </div>
                                             );
@@ -345,36 +372,39 @@
                                     <button 
                                         onClick={submitRSVP} 
                                         disabled={isSubmitting}
-                                        className="w-full bg-emerald-700 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-xs hover:bg-emerald-800 shadow-lg shadow-emerald-200 disabled:opacity-50 transition-all"
+                                        className="w-full bg-emerald-800 text-white py-5 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-emerald-900 shadow-xl shadow-emerald-900/20 disabled:opacity-50 transition-all hover:-translate-y-0.5 disabled:hover:translate-y-0"
                                     >
                                         {isSubmitting ? "Enviando..." : "Confirmar Presença"}
                                     </button>
-                                    <button onClick={() => setSelectedInvite(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-widest mt-6 hover:text-slate-600 transition-colors">Trocar convite</button>
+                                    <button onClick={() => setSelectedInvite(null)} className="w-full text-slate-400 text-[10px] uppercase tracking-[0.2em] mt-5 hover:text-slate-700 transition-colors font-semibold">Trocar convite</button>
                                 </div>
                             )}
                         </div>
                     </section>
 
                     {/* Gifts Section */}
-                    <section id="presentes" className="py-24 px-6 max-w-6xl mx-auto">
+                    <section id="presentes" className="bg-white py-24 px-6 max-w-6xl mx-auto">
                         <div className="text-center mb-16">
-                            <h2 className="text-4xl font-playfair mb-4">Lista de Presentes</h2>
-                            <p className="text-slate-400 text-sm max-w-lg mx-auto italic">Contribua para nossa nova etapa de vida.</p>
+                            <span className="text-[10px] text-emerald-600 uppercase tracking-[0.3em] font-bold mb-3 block">Mimo aos noivos</span>
+                            <h2 className="text-4xl md:text-5xl font-playfair mb-4 text-slate-900">Lista de Presentes</h2>
+                            <p className="text-slate-500 text-sm max-w-lg mx-auto font-light">Sua presença é nosso maior presente, mas se desejar nos abençoar, fique à vontade para escolher uma das opções abaixo.</p>
+                            <div className="h-px w-20 bg-emerald-200 mx-auto mt-8"></div>
                         </div>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                             {GIFTS_DATA.map(gift => (
-                                <div key={gift.id} className="bg-white group rounded-[2.5rem] p-4 border border-slate-50 shadow-sm hover:shadow-2xl transition-all duration-500 flex flex-col">
-                                    <div className="w-full aspect-square rounded-[2rem] overflow-hidden mb-6 relative">
+                                <div key={gift.id} className="bg-white group rounded-[2rem] p-4 border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.08)] transition-all duration-500 flex flex-col hover:-translate-y-1">
+                                    <div className="w-full aspect-square rounded-[1.5rem] overflow-hidden mb-6 relative bg-slate-50">
                                         <img src={gift.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" alt={gift.title} />
                                     </div>
-                                    <div className="px-2 flex-grow flex flex-col">
+                                    <div className="px-3 flex-grow flex flex-col">
                                         <h3 className="text-xl font-playfair text-slate-800 mb-2">{gift.title}</h3>
-                                        <p className="text-slate-400 text-[11px] mb-4 line-clamp-2">{gift.desc}</p>
-                                        <div className="mt-auto flex justify-between items-center pt-4 border-t border-slate-50">
-                                            <p className="text-lg font-bold text-slate-900">R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                        <p className="text-slate-500 text-[12px] font-light mb-4 line-clamp-2 leading-relaxed">{gift.desc}</p>
+                                        <div className="mt-auto flex justify-between items-center pt-5 border-t border-slate-50">
+                                            <p className="text-lg font-semibold text-emerald-900">R$ {gift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                             <button 
                                                 onClick={() => setSelectedGift(gift)}
-                                                className="bg-slate-900 text-white px-5 py-3 rounded-xl text-[9px] uppercase tracking-widest font-bold hover:bg-black transition-all"
+                                                className="bg-emerald-50 text-emerald-800 border border-emerald-100 px-5 py-2.5 rounded-full text-[9px] uppercase tracking-widest font-bold group-hover:bg-emerald-800 group-hover:text-white transition-all duration-300"
                                             >
                                                 Presentear
                                             </button>
@@ -387,28 +417,28 @@
 
                     {/* MODAL DE PAGAMENTO */}
                     {selectedGift && (
-                        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                             {/* Backdrop */}
-                            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity" onClick={() => setSelectedGift(null)}></div>
+                            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={() => setSelectedGift(null)}></div>
                             
                             {/* Modal Card */}
                             <div className="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-md relative z-10 shadow-2xl animate-fade-in flex flex-col items-center text-center">
-                                <button onClick={() => setSelectedGift(null)} className="absolute top-5 right-6 text-slate-300 hover:text-slate-600 transition-colors text-xl font-bold">✕</button>
+                                <button onClick={() => setSelectedGift(null)} className="absolute top-5 right-6 text-slate-400 hover:text-slate-800 transition-colors text-xl font-bold">✕</button>
                                 
-                                <div className="w-32 h-32 rounded-full overflow-hidden mb-5 border-4 border-emerald-100 shadow-inner">
+                                <div className="w-32 h-32 rounded-full overflow-hidden mb-6 border-4 border-emerald-50 shadow-sm">
                                     <img src={selectedGift.image} className="w-full h-full object-cover" alt={selectedGift.title} />
                                 </div>
                                 
                                 <h3 className="text-2xl font-playfair text-slate-900 mb-2">{selectedGift.title}</h3>
-                                <p className="text-slate-500 text-sm mb-4 leading-relaxed px-4">{selectedGift.desc}</p>
-                                <p className="text-3xl font-bold text-emerald-700 mb-8 font-playfair">R$ {selectedGift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                <p className="text-slate-500 text-sm mb-5 leading-relaxed px-2 font-light">{selectedGift.desc}</p>
+                                <p className="text-3xl font-bold text-emerald-800 mb-8 font-playfair">R$ {selectedGift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
                                 
                                 <div className="flex flex-col gap-3 w-full">
                                     {/* Botão PIX (Nubank style) */}
                                     <a 
                                         href={selectedGift.linkpix} 
                                         target="_blank" 
-                                        className="w-full bg-[#820ad1] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#6d06b0] shadow-lg shadow-purple-200 hover:shadow-xl transition-all flex items-center justify-center gap-3 transform hover:-translate-y-1"
+                                        className="w-full bg-[#32bcad] text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#2aa395] shadow-lg shadow-[#32bcad]/20 hover:shadow-xl transition-all flex items-center justify-center gap-3 hover:-translate-y-0.5"
                                     >
                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.01 21.05l-7.4-4.2a1.6 1.6 0 010-2.8l7.4-4.2 7.39 4.2a1.6 1.6 0 010 2.8l-7.4 4.2zm-9.01-6.1l8.1 4.6a1.8 1.8 0 001.8 0l8.1-4.6a1.8 1.8 0 000-3.13l-8.1-4.6a1.8 1.8 0 00-1.8 0l-8.1 4.6a1.8 1.8 0 000 3.14zM12 2.95l7.4 4.2-2.5 1.43-4.9-2.8-4.9 2.8-2.5-1.43 7.4-4.2z"/></svg>
                                        Pagar com Pix
@@ -418,45 +448,63 @@
                                     <a 
                                         href={selectedGift.linkcartao} 
                                         target="_blank" 
-                                        className="w-full bg-[#009ee3] text-white py-4 rounded-xl font-bold uppercase tracking-widest text-xs hover:bg-[#007eb5] shadow-lg shadow-sky-200 hover:shadow-xl transition-all flex items-center justify-center gap-3 transform hover:-translate-y-1"
+                                        className="w-full bg-[#009ee3] text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#0089c4] shadow-lg shadow-sky-500/20 hover:shadow-xl transition-all flex items-center justify-center gap-3 hover:-translate-y-0.5"
                                     >
                                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
                                        Pagar com Cartão
                                     </a>
                                 </div>
                                 
-                                <p className="mt-6 text-[10px] text-slate-300 uppercase tracking-wider">Seguro e rápido</p>
+                                <p className="mt-6 text-[9px] text-slate-400 uppercase tracking-widest font-semibold flex items-center gap-2">
+                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                    Transação 100% Segura
+                                </p>
                             </div>
                         </div>
                     )}
 
                     {/* Nossa História & Fotos Section */}
-                    <section id="historia" className="py-24 px-6 max-w-7xl mx-auto w-full border-t border-emerald-50">
-                        <div className="text-center mb-16 max-w-3xl mx-auto animate-fade-in">
-                            <h2 className="text-4xl md:text-5xl font-playfair mb-8 text-slate-900">Nossa História</h2>
-                            <p className="text-slate-600 text-sm md:text-base leading-relaxed md:leading-loose font-light italic">
-                                "O que começou com horas de conversas ininterruptas se transformou em uma vida inteira de parceria. Passamos pelo namoro, pelo amadurecimento e agora chegamos ao altar! Estamos muito felizes em ter vocês conosco para celebrar o nosso matrimônio e o amor que começou lá atrás, nos corredores da escola."
-                            </p>
-                            <div className="h-1 w-20 bg-emerald-200 mx-auto mt-10 rounded-full"></div>
-                        </div>
-
-                        {/* Photo Grid - True Masonry (Sem cortes) */}
-                        <div className="columns-1 sm:columns-2 md:columns-3 gap-4 md:gap-6 w-full animate-fade-in">
-                            {COUPLE_PHOTOS.map((photo, index) => (
-                                <div key={index} className="relative overflow-hidden rounded-2xl group cursor-pointer shadow-sm hover:shadow-xl transition-all duration-500 break-inside-avoid mb-4 md:mb-6">
-                                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-10" />
-                                    <img 
-                                        src={photo} 
-                                        alt={`Foto Casal ${index + 1}`} 
-                                        className="w-full h-auto transform group-hover:scale-105 transition-transform duration-700" 
-                                    />
+                    <section id="historia" className="bg-emerald-50/30 py-24 px-6 border-t border-emerald-50/50">
+                        <div className="max-w-7xl mx-auto w-full">
+                            <div className="text-center mb-16 max-w-3xl mx-auto animate-fade-in">
+                                <span className="text-[10px] text-emerald-600 uppercase tracking-[0.3em] font-bold mb-3 block">Desde a Escola</span>
+                                <h2 className="text-4xl md:text-5xl font-playfair mb-8 text-slate-900">Nossa História</h2>
+                                
+                                <div className="relative">
+                                    <span className="text-6xl text-emerald-200 absolute -top-4 -left-2 md:-left-8 font-serif leading-none opacity-50">"</span>
+                                    <p className="text-slate-600 text-sm md:text-base leading-relaxed md:leading-loose font-light italic relative z-10 px-4">
+                                        O que começou com horas de conversas ininterruptas se transformou em uma vida inteira de parceria. Passamos pelo namoro, pelo amadurecimento e agora chegamos ao altar! Estamos muito felizes em ter vocês conosco para celebrar o nosso matrimônio e o amor que começou lá atrás, nos corredores da escola.
+                                    </p>
+                                    <span className="text-6xl text-emerald-200 absolute -bottom-8 -right-2 md:-right-8 font-serif leading-none opacity-50">"</span>
                                 </div>
-                            ))}
+                            </div>
+
+                            {/* Photo Grid - True Masonry (Sem cortes) */}
+                            <div className="columns-1 sm:columns-2 md:columns-3 gap-4 md:gap-6 w-full animate-fade-in mt-20">
+                                {COUPLE_PHOTOS.map((photo, index) => (
+                                    <div key={index} className="relative overflow-hidden rounded-[2rem] group cursor-pointer shadow-[0_4px_20px_rgb(0,0,0,0.03)] hover:shadow-[0_10px_30px_rgb(0,0,0,0.08)] transition-all duration-500 break-inside-avoid mb-4 md:mb-6">
+                                        <div className="absolute inset-0 bg-emerald-900/0 group-hover:bg-emerald-900/10 transition-colors z-10" />
+                                        <img 
+                                            src={photo} 
+                                            alt={`Foto Casal ${index + 1}`} 
+                                            className="w-full h-auto transform group-hover:scale-105 transition-transform duration-700" 
+                                        />
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     </section>
 
-                    <footer className="py-12 text-center text-slate-400 text-[10px] tracking-[0.3em] uppercase border-t border-slate-100">
-                        <p>Com carinho, {COUPLE_NAMES}</p>
+                    <footer className="bg-emerald-900 text-white py-16 text-center border-t border-emerald-800">
+                        <div className="flex justify-center mb-6">
+                            <span className="text-3xl font-amsterdam">{COUPLE_NAMES}</span>
+                        </div>
+                        <p className="text-emerald-300 text-[9px] tracking-[0.4em] uppercase font-semibold">
+                            Mal podemos esperar para celebrar com você!
+                        </p>
+                        <div className="mt-12 text-emerald-500 text-[8px] uppercase tracking-widest">
+                            &copy; 2026 Júlia & Vitor
+                        </div>
                     </footer>
                 </div>
             );
