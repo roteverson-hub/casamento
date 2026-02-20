@@ -25,7 +25,7 @@
         .font-playfair { font-family: 'Playfair Display', serif; }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .animate-fade-in { animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }https://script.google.com/macros/s/AKfycbwB7o5ix3C9yKnmVepXES_v2C7WzzxQIKOHNL4bGTiEz1kh0l7v1pBhnfkQeX45cRzz/exec
         
         @keyframes bounce-subtle { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(8px); } }
         .animate-bounce-subtle { animation: bounce-subtle 2s infinite ease-in-out; }
@@ -301,6 +301,8 @@
         
         const App = () => {
             const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+            
+            // Estados RSVP
             const [searchName, setSearchName] = useState('');
             const [loading, setLoading] = useState(false);
             const [groupedResults, setGroupedResults] = useState(null); 
@@ -310,8 +312,13 @@
             const [isSubmitting, setIsSubmitting] = useState(false);
             const [finished, setFinished] = useState(false);
             
-            // Estado para o Modal de Presentes
+            // Estados Modal de Presentes
             const [selectedGift, setSelectedGift] = useState(null);
+            const [giftStep, setGiftStep] = useState(1);
+            const [giftSender, setGiftSender] = useState('');
+            const [giftMessage, setGiftMessage] = useState('');
+            const [giftError, setGiftError] = useState('');
+            const [isSendingGift, setIsSendingGift] = useState(false);
 
             useEffect(() => {
                 const timer = setInterval(() => {
@@ -392,6 +399,46 @@
                 } finally {
                     setIsSubmitting(false);
                 }
+            };
+
+            // Funções de Presente
+            const handleGiftContinue = async () => {
+                if (!giftSender.trim()) {
+                    setGiftError("Por favor, preencha o seu nome!");
+                    return;
+                }
+                setGiftError("");
+                setIsSendingGift(true);
+                
+                try {
+                    // Envia os dados do presente para o AppScript (como fire and forget)
+                    const payload = {
+                        action: 'presente',
+                        presente: selectedGift.title,
+                        nome: giftSender,
+                        mensagem: giftMessage,
+                        valor: selectedGift.price
+                    };
+                    
+                    await fetch(SCRIPT_URL, { 
+                        method: 'POST', 
+                        mode: 'no-cors', 
+                        body: JSON.stringify(payload) 
+                    });
+                } catch (e) {
+                    console.error("Erro ao enviar mensagem do presente:", e);
+                } finally {
+                    setIsSendingGift(false);
+                    setGiftStep(2); // Avança para o pagamento independente do sucesso do envio
+                }
+            };
+
+            const closeGiftModal = () => {
+                setSelectedGift(null);
+                setGiftStep(1);
+                setGiftSender('');
+                setGiftMessage('');
+                setGiftError('');
             };
 
             return (
@@ -630,50 +677,93 @@
                         </div>
                     </section>
 
-                    {/* MODAL DE PAGAMENTO */}
+                    {/* MODAL DE PRESENTES */}
                     {selectedGift && (
                         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
                             {/* Backdrop */}
-                            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={() => setSelectedGift(null)}></div>
+                            <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity" onClick={closeGiftModal}></div>
                             
                             {/* Modal Card */}
-                            <div className="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-md relative z-10 shadow-2xl animate-fade-in flex flex-col items-center text-center">
-                                <button onClick={() => setSelectedGift(null)} className="absolute top-5 right-6 text-slate-400 hover:text-slate-800 transition-colors text-xl font-bold">✕</button>
+                            <div className="bg-white rounded-[2rem] p-6 md:p-8 w-full max-w-md relative z-10 shadow-2xl animate-fade-in flex flex-col items-center text-center overflow-y-auto max-h-[90vh] custom-scrollbar">
+                                <button onClick={closeGiftModal} className="absolute top-5 right-6 text-slate-400 hover:text-slate-800 transition-colors text-xl font-bold">✕</button>
                                 
-                                <div className="w-32 h-32 rounded-full overflow-hidden mb-6 border-4 border-emerald-50 shadow-sm">
-                                    <img src={selectedGift.image} className="w-full h-full object-cover" alt={selectedGift.title} />
-                                </div>
-                                
-                                <h3 className="text-2xl font-playfair text-slate-900 mb-2">{selectedGift.title}</h3>
-                                <p className="text-slate-500 text-sm mb-5 leading-relaxed px-2 font-light">{selectedGift.desc}</p>
-                                <p className="text-3xl font-bold text-emerald-800 mb-8 font-playfair">R$ {selectedGift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                                
-                                <div className="flex flex-col gap-3 w-full">
-                                    {/* Botão PIX (Nubank style) */}
-                                    <a 
-                                        href={selectedGift.linkpix} 
-                                        target="_blank" 
-                                        className="w-full bg-[#32bcad] text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#2aa395] shadow-lg shadow-[#32bcad]/20 hover:shadow-xl transition-all flex items-center justify-center gap-3 hover:-translate-y-0.5"
-                                    >
-                                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.01 21.05l-7.4-4.2a1.6 1.6 0 010-2.8l7.4-4.2 7.39 4.2a1.6 1.6 0 010 2.8l-7.4 4.2zm-9.01-6.1l8.1 4.6a1.8 1.8 0 001.8 0l8.1-4.6a1.8 1.8 0 000-3.13l-8.1-4.6a1.8 1.8 0 00-1.8 0l-8.1 4.6a1.8 1.8 0 000 3.14zM12 2.95l7.4 4.2-2.5 1.43-4.9-2.8-4.9 2.8-2.5-1.43 7.4-4.2z"/></svg>
-                                       Pagar com Pix
-                                    </a>
-                                    
-                                    {/* Botão Cartão (Mercado Pago style) */}
-                                    <a 
-                                        href={selectedGift.linkcartao} 
-                                        target="_blank" 
-                                        className="w-full bg-[#009ee3] text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#0089c4] shadow-lg shadow-sky-500/20 hover:shadow-xl transition-all flex items-center justify-center gap-3 hover:-translate-y-0.5"
-                                    >
-                                       <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
-                                       Pagar com Cartão
-                                    </a>
-                                </div>
-                                
-                                <p className="mt-6 text-[9px] text-slate-400 uppercase tracking-widest font-semibold flex items-center gap-2">
-                                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
-                                    Transação 100% Segura
-                                </p>
+                                {giftStep === 1 ? (
+                                    <div className="w-full flex flex-col items-center animate-fade-in">
+                                        <div className="w-24 h-24 rounded-full overflow-hidden mb-4 border-4 border-emerald-50 shadow-sm shrink-0">
+                                            <img src={selectedGift.image} className="w-full h-full object-cover" alt={selectedGift.title} />
+                                        </div>
+                                        <h3 className="text-2xl font-playfair text-slate-900 mb-1">{selectedGift.title}</h3>
+                                        <p className="text-2xl font-bold text-emerald-800 mb-6 font-playfair">R$ {selectedGift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                                        
+                                        <div className="w-full text-left space-y-4 mb-8">
+                                            <div>
+                                                <label className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-1.5 block">Seu Nome *</label>
+                                                <input 
+                                                    type="text" 
+                                                    value={giftSender}
+                                                    onChange={(e) => setGiftSender(e.target.value)}
+                                                    placeholder="Ex: Tio João" 
+                                                    className="w-full p-3.5 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-emerald-200 transition-all border border-slate-100 focus:border-emerald-300 text-sm"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="text-[10px] uppercase tracking-widest text-emerald-700 font-bold mb-1.5 block">Deixe um recadinho (Opcional)</label>
+                                                <textarea 
+                                                    rows="3"
+                                                    value={giftMessage}
+                                                    onChange={(e) => setGiftMessage(e.target.value)}
+                                                    placeholder="Escreva uma mensagem de carinho aos noivos..." 
+                                                    className="w-full p-3.5 bg-slate-50 rounded-xl outline-none focus:ring-2 focus:ring-emerald-200 transition-all border border-slate-100 focus:border-emerald-300 text-sm resize-none custom-scrollbar"
+                                                ></textarea>
+                                            </div>
+                                            {giftError && <p className="text-red-400 text-[10px] uppercase tracking-wider font-medium">{giftError}</p>}
+                                        </div>
+                                        
+                                        <button 
+                                            onClick={handleGiftContinue} 
+                                            disabled={isSendingGift}
+                                            className="w-full bg-emerald-800 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-emerald-900 shadow-lg shadow-emerald-900/20 transition-all hover:-translate-y-0.5 disabled:opacity-50"
+                                        >
+                                            {isSendingGift ? "Processando..." : "Prosseguir para Pagamento"}
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <div className="w-full flex flex-col items-center animate-fade-in py-4">
+                                        <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center mb-5 shadow-inner">
+                                            <svg className="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path></svg>
+                                        </div>
+                                        
+                                        <h3 className="text-2xl font-playfair text-slate-900 mb-2">Recadinho Salvo!</h3>
+                                        <p className="text-slate-500 text-sm mb-8 leading-relaxed px-2 font-light">Agora é só escolher uma das opções abaixo para nos enviar o presente no valor de <strong>R$ {selectedGift.price.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</strong>.</p>
+                                        
+                                        <div className="flex flex-col gap-3 w-full">
+                                            {/* Botão PIX (Nubank style) */}
+                                            <a 
+                                                href={selectedGift.linkpix} 
+                                                target="_blank" 
+                                                className="w-full bg-[#32bcad] text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#2aa395] shadow-lg shadow-[#32bcad]/20 hover:shadow-xl transition-all flex items-center justify-center gap-3 hover:-translate-y-0.5"
+                                            >
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12.01 21.05l-7.4-4.2a1.6 1.6 0 010-2.8l7.4-4.2 7.39 4.2a1.6 1.6 0 010 2.8l-7.4 4.2zm-9.01-6.1l8.1 4.6a1.8 1.8 0 001.8 0l8.1-4.6a1.8 1.8 0 000-3.13l-8.1-4.6a1.8 1.8 0 00-1.8 0l-8.1 4.6a1.8 1.8 0 000 3.14zM12 2.95l7.4 4.2-2.5 1.43-4.9-2.8-4.9 2.8-2.5-1.43 7.4-4.2z"/></svg>
+                                            Pagar com Pix
+                                            </a>
+                                            
+                                            {/* Botão Cartão (Mercado Pago style) */}
+                                            <a 
+                                                href={selectedGift.linkcartao} 
+                                                target="_blank" 
+                                                className="w-full bg-[#009ee3] text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-[11px] hover:bg-[#0089c4] shadow-lg shadow-sky-500/20 hover:shadow-xl transition-all flex items-center justify-center gap-3 hover:-translate-y-0.5"
+                                            >
+                                            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 14H4v-6h16v6zm0-10H4V6h16v2z"/></svg>
+                                            Pagar com Cartão
+                                            </a>
+                                        </div>
+                                        
+                                        <p className="mt-6 text-[9px] text-slate-400 uppercase tracking-widest font-semibold flex items-center justify-center gap-2">
+                                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                                            Transação 100% Segura
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
